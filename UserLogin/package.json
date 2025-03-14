@@ -1,7 +1,7 @@
 {
   "name": "userlogin",
   "version": "1.0.0",
-  "description": "Handles user login logic ",
+  "description": "Handles user login logic",
   "main": "Login.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "bcrypt": "^5.1.0",
+    "mysql2": "^3.6.0",
+    "dotenv": "^16.4.0"
   }
 }
