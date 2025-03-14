@@ -109,26 +109,29 @@ app.post('/signup', (req, res) => {
             console.log('Password hashed successfully');
             const insertQuery = `INSERT INTO users (email, password, name, role) VALUES ('${email}', '${hash}', '${name}', '${role}')`;
             console.log('Executing INSERT query...');
-            const result = db.insertQuery(insertQuery);
+            db.insertQuery(insertQuery);
 
-                const userId = result.insertId;  // Getting the inserted user's ID
-                console.log('User inserted, generating JWT token...');
-                const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
+            const selectquery = `SELECT * FROM users WHERE email = '${email}'`;
+            const result = db.selectQuery(selectquery);
 
-                console.log('Inserting token into validTokens table...');
-                db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`);
+            const userId = result.id;  // Getting the inserted user's ID
+            console.log('User inserted, generating JWT token...');
+            const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
 
-                console.log('Signup process completed');
-                res.status(201).json({
-                    token,
-                    user: {
-                        id: userId,
-                        email,
-                        name,
-                        role  // Return the role along with other user details
-                    }
-                });
-            
+            console.log('Inserting token into validTokens table...');
+            db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`);
+
+            console.log('Signup process completed');
+            res.status(201).json({
+                token,
+                user: {
+                    id: userId,
+                    email,
+                    name,
+                    role  // Return the role along with other user details
+                }
+            });
+
         }
     });
 });
