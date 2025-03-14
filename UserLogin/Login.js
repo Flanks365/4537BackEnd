@@ -24,53 +24,51 @@ app.options('*', cors({
 
 class Database {
     constructor() {
-        this.connection = null;
+        this.pool = null;
     }
 
+    // Establish a connection pool instead of a single connection
     connect() {
-        if (!this.connection) {
-            this.connection = mysql.createConnection({
+        if (!this.pool) {
+            this.pool = mysql.createPool({
                 host: process.env.HOST,
                 user: process.env.USERNAME,
                 password: process.env.PASSWORD,
                 database: process.env.DATABASE,
-                port: process.env.PORT
+                port: process.env.PORT,
+                connectionLimit: 10,  // Maximum number of connections
+                waitForConnections: true,  // Wait for a connection if all are in use
+                connectTimeout: 10000,  // 10 seconds timeout
             });
 
-            this.connection.connect((err) => {
-                if (err) {
-                    console.error('Error connecting to database:', err);
-                } else {
-                    console.log('Connected to database');
-                }
-            });
+            console.log('Database pool connected');
         }
     }
 
+    // Close the connection pool
     close() {
-        if (this.connection) {
-            this.connection.end((err) => {
+        if (this.pool) {
+            this.pool.end((err) => {
                 if (err) {
-                    console.error('Error closing database connection:', err);
+                    console.error('Error closing database connection pool:', err);
                 } else {
-                    console.log('Connection to database closed');
+                    console.log('Connection pool closed');
                 }
-                this.connection = null;
+                this.pool = null;
             });
         }
     }
 
-    query(query, params, callback) {
-        this.connect();  // Ensure the connection is open before running the query
-        this.connection.query(query, params, (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                callback(err, null);  // Pass the error to the callback
-            } else {
-                callback(null, results);  // Pass the results to the callback
-            }
-
-        });
+    // Query the database using async/await for better readability and error handling
+    async query(query, params) {
+        try {
+            this.connect(); // Ensure the pool is created before running any queries
+            const [results] = await this.pool.promise().query(query, params);
+            return results;
+        } catch (err) {
+            console.error('Error executing query:', err);
+            throw new Error('Error executing query');
+        }
     }
 }
 
