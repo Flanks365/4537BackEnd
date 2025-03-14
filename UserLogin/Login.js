@@ -33,7 +33,7 @@ class Database {
             user: process.env.USERNAME,
             password: process.env.PASSWORD,
             database: process.env.DATABASE,
-            port: process.env.PORT_DB
+            port: process.env.PORT
         });
 
         return new Promise((resolve, reject) => {
@@ -73,7 +73,7 @@ class Database {
 
 
 const database = new Database();
-const SECRET_KEY = process.env.JWT_SECRET;
+const SECRET_KEY = process.env.J;
 
 app.post('/signup', (req, res) => {
     const { email, password, name } = req.body;
