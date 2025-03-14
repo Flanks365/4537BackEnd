@@ -145,10 +145,7 @@ app.post('/login', (req, res) => {
     const query = `SELECT * FROM users WHERE email = '${email}'`;
     const result = db.selectQuery(query);
 
-    if (result.error) {
-        console.error('Error executing SELECT query:', result.error);
-        res.status(500).json({ error: result.error });
-    } else if (result.length === 0) {
+    if (result.length === 0) {
         console.log('No user found with the provided email');
         res.status(401).json({ error: 'Invalid email or password' });
     } else {
