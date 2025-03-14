@@ -19,7 +19,8 @@ const createDbConnection = () => {
         user: process.env.USERNAME,
         password: process.env.PASSWORD,
         database: process.env.DATABASE,
-        port: process.env.PORT
+        port: process.env.PORT,
+        connectTimeout: 30000
     });
 };
 
