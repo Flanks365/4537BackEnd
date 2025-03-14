@@ -12,7 +12,7 @@ app.use(express.json());
 // CORS configuration: Allow all origins and only POST methods
 app.use(cors({
     origin: '*',  // Allow all origins
-    methods: ['POST'],  // Only allow POST methods
+    methods: ['*'],  // Only allow POST methods
 }));
 
 class Database {
