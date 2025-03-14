@@ -28,23 +28,20 @@ class Database {
     }
 
     connect() {
-        if (!this.connection) {
-            this.connection = mysql.createConnection({
-                host: process.env.HOST,
-                user: process.env.USERNAME,
-                password: process.env.PASSWORD,
-                database: process.env.DATABASE,
-                port: process.env.PORT_DB
-            });
+        this.connection = mysql.createConnection({
+            host: process.env.HOST,
+            user: process.env.USERNAME,
+            password: process.env.PASSWORD,
+            database: process.env.DATABASE,
+            port: process.env.PORT_DB
+        });
 
+        return new Promise((resolve, reject) => {
             this.connection.connect((err) => {
-                if (err) {
-                    console.error('Error connecting to database:', err);
-                } else {
-                    console.log('Connected to database');
-                }
+                if (err) reject('Error connecting to database: ' + err);
+                else resolve();
             });
-        }
+        });
     }
 
     close() {
@@ -55,19 +52,25 @@ class Database {
                 } else {
                     console.log('Connection to database closed');
                 }
-                this.connection = null;
             });
+            this.connection = null;
         }
     }
 
-    query(query, params, callback) {
-        this.connect();
-        this.connection.query(query, params, (err, results) => {
-            callback(err, results);
-            this.close();
-        });
+    async query(query, params, callback) {
+        try {
+            await this.connect();  // Ensure the connection is open
+            this.connection.query(query, params, (err, results) => {
+                callback(err, results);
+                this.close();  // Close connection after query
+            });
+        } catch (error) {
+            console.error(error);
+            callback(error, null);
+        }
     }
 }
+
 
 const database = new Database();
 const SECRET_KEY = process.env.JWT_SECRET;
