@@ -1,0 +1,14 @@
+{
+  "name": "userlogin",
+  "version": "1.0.0",
+  "description": "Handles user login logic ",
+  "main": "Login.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
