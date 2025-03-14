@@ -111,10 +111,6 @@ app.post('/signup', (req, res) => {
             console.log('Executing INSERT query...');
             const result = db.insertQuery(insertQuery);
 
-            if (result.error) {
-                console.error('Error inserting user into database:', result.error);
-                res.status(500).json({ error: result.error });
-            } else {
                 const userId = result.insertId;  // Getting the inserted user's ID
                 console.log('User inserted, generating JWT token...');
                 const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
@@ -132,7 +128,7 @@ app.post('/signup', (req, res) => {
                         role  // Return the role along with other user details
                     }
                 });
-            }
+            
         }
     });
 });
