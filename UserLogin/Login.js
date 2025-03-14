@@ -9,10 +9,17 @@ const app = express();
 const port = 8080;
 app.use(express.json());
 
-// CORS configuration: Allow all origins and only POST methods
+// CORS configuration: Allow all origins and only POST methods, including OPTIONS pre-flight requests for POST
 app.use(cors({
     origin: '*',  // Allow all origins
-    methods: ['*'],  // Only allow POST methods
+    methods: ['POST'],  // Only allow POST methods
+    allowedHeaders: ['Content-Type'],  // Specify the allowed headers (e.g., for JSON requests)
+}));
+
+// Handle OPTIONS pre-flight requests explicitly for POST
+app.options('*', cors({
+    origin: '*',  // Allow all origins for OPTIONS requests
+    methods: ['POST'],  // Only allow POST methods for OPTIONS requests
 }));
 
 class Database {
