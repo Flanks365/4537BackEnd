@@ -7,152 +7,115 @@ require('dotenv').config();
 
 const app = express();
 const port = 8080;
+
+// Middleware
 app.use(express.json());
+app.use(cors()); // Allow everything
 
-// CORS configuration: Allow all origins and only POST methods, including OPTIONS pre-flight requests for POST
-app.use(cors({
-    origin: '*',
-    methods: ['*'],
-    allowedHeaders: ['Content-Type'],
-}));
-
-app.options('*', cors({
-    origin: '*',
-    methods: ['*'],
-}));
-
-// Utility to create a new MySQL connection
+// Function to create a MySQL connection
 const createDbConnection = () => {
     return mysql.createConnection({
         host: process.env.HOST,
         user: process.env.USERNAME,
         password: process.env.PASSWORD,
         database: process.env.DATABASE,
+        port: process.env.PORT
     });
 };
 
+// Signup route
 app.post('/signup', (req, res) => {
     const { email, password, name } = req.body;
-    const role = 'student';  // Default role
+    const role = 'student'; // Default role
 
-    const saltRounds = 10;
-
-    bcrypt.hash(password, saltRounds, (err, hash) => {
+    bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             console.error('Error hashing password:', err.message);
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
         const connection = createDbConnection();
+        const insertQuery = `INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`;
 
-        const insertQuery = `INSERT INTO users (email, password, name, role) VALUES ('${email}', '${hash}', '${name}', '${role}')`;
-        
-        connection.query(insertQuery, (err, insertResult) => {
+        connection.query(insertQuery, [email, hash, name, role], (err, result) => {
             if (err) {
                 console.error('Error inserting user:', err.message);
-                connection.end();  // Close connection
-                return res.status(500).json({ error: err.message });
+                connection.end();
+                return res.status(500).json({ error: 'Internal server error' });
             }
 
-            const selectQuery = `SELECT * FROM users WHERE email = '${email}'`;
-            connection.query(selectQuery, (err, result) => {
+            const userId = result.insertId;
+            const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
+
+            const tokenQuery = `INSERT INTO validTokens (token, user_id) VALUES (?, ?)`;
+            connection.query(tokenQuery, [token, userId], (err) => {
+                connection.end();
                 if (err) {
-                    console.error('Error selecting user:', err.message);
-                    connection.end();  // Close connection
-                    return res.status(500).json({ error: err.message });
+                    console.error('Error inserting token:', err.message);
+                    return res.status(500).json({ error: 'Internal server error' });
                 }
 
-                if (result.length === 0) {
-                    connection.end();  // Close connection
-                    return res.status(400).json({ error: 'User not found after insertion' });
-                }
-
-                const userId = result[0].id;  // Getting the inserted user's ID
-                const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
-
-                const tokenQuery = `INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`;
-                connection.query(tokenQuery, (err) => {
-                    if (err) {
-                        console.error('Error inserting token:', err.message);
-                        connection.end();  // Close connection
-                        return res.status(500).json({ error: err.message });
-                    }
-
-                    connection.end();  // Close connection
-                    res.status(201).json({
-                        token,
-                        user: {
-                            id: userId,
-                            email,
-                            name,
-                            role  // Return the role along with other user details
-                        }
-                    });
+                res.status(201).json({
+                    token,
+                    user: { id: userId, email, name, role }
                 });
             });
         });
     });
 });
 
+// Login route
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-
     const connection = createDbConnection();
 
-    const query = `SELECT * FROM users WHERE email = '${email}'`;
-    connection.query(query, (err, result) => {
+    const selectQuery = `SELECT * FROM users WHERE email = ?`;
+    connection.query(selectQuery, [email], (err, results) => {
         if (err) {
             console.error('Error selecting user:', err.message);
-            connection.end();  // Close connection
-            return res.status(500).json({ error: err.message });
+            connection.end();
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
-        if (result.length === 0) {
-            connection.end();  // Close connection
+        if (results.length === 0) {
+            connection.end();
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        const user = result[0];  // Get the user object from the result
-
+        const user = results[0];
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) {
                 console.error('Error comparing passwords:', err.message);
-                connection.end();  // Close connection
-                return res.status(500).json({ error: err.message });
+                connection.end();
+                return res.status(500).json({ error: 'Internal server error' });
             }
 
             if (!match) {
-                connection.end();  // Close connection
+                connection.end();
                 return res.status(401).json({ error: 'Invalid email or password' });
             }
 
             const token = jwt.sign({ id: user.id, email: user.email }, process.env.J, { expiresIn: '2h' });
 
-            const deleteOldTokenQuery = `DELETE FROM validTokens WHERE user_id = '${user.id}'`;
-            connection.query(deleteOldTokenQuery, (err) => {
+            const deleteOldTokenQuery = `DELETE FROM validTokens WHERE user_id = ?`;
+            connection.query(deleteOldTokenQuery, [user.id], (err) => {
                 if (err) {
                     console.error('Error removing old token:', err.message);
-                    connection.end();  // Close connection
-                    return res.status(500).json({ error: err.message });
+                    connection.end();
+                    return res.status(500).json({ error: 'Internal server error' });
                 }
 
-                const tokenQuery = `INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${user.id}')`;
-                connection.query(tokenQuery, (err) => {
+                const tokenQuery = `INSERT INTO validTokens (token, user_id) VALUES (?, ?)`;
+                connection.query(tokenQuery, [token, user.id], (err) => {
+                    connection.end();
                     if (err) {
                         console.error('Error inserting token:', err.message);
-                        connection.end();  // Close connection
-                        return res.status(500).json({ error: err.message });
+                        return res.status(500).json({ error: 'Internal server error' });
                     }
 
-                    connection.end();  // Close connection
                     res.status(200).json({
                         token,
-                        user: {
-                            id: user.id,
-                            email: user.email,
-                            name: user.name,
-                            role: user.role  // Return the role along with other user details
-                        }
+                        user: { id: user.id, email: user.email, name: user.name, role: user.role }
                     });
                 });
             });
