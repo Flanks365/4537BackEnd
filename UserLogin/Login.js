@@ -72,92 +72,90 @@ class Database {
     }
 }
 
-
 const database = new Database();
 const SECRET_KEY = process.env.J;
 
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
     const { email, password, name } = req.body;
     const role = 'student';  // Default role
     const saltRounds = 10;
 
-    // Check if the email already exists
-    database.query(`SELECT * FROM users WHERE email = ?`, [email], (err, results) => {
-        if (err) return res.status(500).json({ msg: 'Error checking for duplicates' });
-        if (results.length > 0) return res.status(400).json({ msg: 'Email already exists' });
+    try {
+        // Check if the email already exists
+        const results = await database.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        if (results.length > 0) {
+            return res.status(400).json({ msg: 'Email already exists' });
+        }
 
         // Hash the password before saving
-        bcrypt.hash(password, saltRounds, (err, hash) => {
-            if (err) return res.status(500).json({ msg: 'Error hashing password' });
+        const hash = await bcrypt.hash(password, saltRounds);
 
-            // Insert the user into the users table
-            const insertQuery = `INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`;
-            database.query(insertQuery, [email, hash, name, role], (err, result) => {
-                if (err) return res.status(500).json({ msg: 'Error inserting user' });
+        // Insert the user into the users table
+        const insertResult = await database.query(`INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`, [email, hash, name, role]);
 
-                // Generate JWT token
-                const token = jwt.sign({ user_id: result.insertId }, SECRET_KEY, { expiresIn: '2h' });
+        // Generate JWT token
+        const token = jwt.sign({ user_id: insertResult.insertId }, SECRET_KEY, { expiresIn: '2h' });
 
-                // Insert the token into the validTokens table
-                database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, result.insertId], (err) => {
-                    if (err) return res.status(500).json({ msg: 'Error storing token' });
+        // Insert the token into the validTokens table
+        await database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, insertResult.insertId]);
 
-                    // Respond with token and user details
-                    res.status(201).json({
-                        token,
-                        user: {
-                            id: result.insertId,
-                            name: name,
-                            email: email,  // Using email now
-                            role: role
-                        }
-                    });
-                });
-            });
+        // Respond with token and user details
+        res.status(201).json({
+            token,
+            user: {
+                id: insertResult.insertId,
+                name,
+                email,
+                role,
+            }
         });
-    });
+    } catch (err) {
+        console.error('Error during signup process:', err);
+        res.status(500).json({ msg: 'Error during signup' });
+    }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    // Fetch the user from the database (email is the key now)
-    database.query(`SELECT * FROM users WHERE email = ?`, [email], (err, results) => {
-        if (err) return res.status(500).json({ msg: 'Error checking for user' });
-        if (results.length === 0) return res.status(400).json({ msg: 'Email not found' });
+    try {
+        // Fetch the user from the database (email is the key now)
+        const results = await database.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        if (results.length === 0) {
+            return res.status(400).json({ msg: 'Email not found' });
+        }
 
         const user = results[0];
 
         // Compare the password with the stored hash
-        bcrypt.compare(password, user.password, (err, match) => {
-            if (err) return res.status(500).json({ msg: 'Error comparing passwords' });
-            if (!match) return res.status(400).json({ msg: 'Incorrect password' });
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(400).json({ msg: 'Incorrect password' });
+        }
 
-            // Generate JWT token
-            const token = jwt.sign({ user_id: user.id }, SECRET_KEY, { expiresIn: '2h' });
+        // Generate JWT token
+        const token = jwt.sign({ user_id: user.id }, SECRET_KEY, { expiresIn: '2h' });
 
-            // Remove existing token for the user before inserting a new one
-            database.query(`DELETE FROM validTokens WHERE user_id = ?`, [user.id], (err) => {
-                if (err) return res.status(500).json({ msg: 'Error deleting old token' });
+        // Remove existing token for the user before inserting a new one
+        await database.query(`DELETE FROM validTokens WHERE user_id = ?`, [user.id]);
 
-                // Insert new token
-                database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, user.id], (err) => {
-                    if (err) return res.status(500).json({ msg: 'Error storing token' });
+        // Insert new token
+        await database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, user.id]);
 
-                    // Respond with token and user details
-                    res.status(200).json({
-                        token,
-                        user: {
-                            id: user.id,
-                            name: user.name,
-                            email: user.email,  // Using email now
-                            role: user.role
-                        }
-                    });
-                });
-            });
+        // Respond with token and user details
+        res.status(200).json({
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
         });
-    });
+    } catch (err) {
+        console.error('Error during login process:', err);
+        res.status(500).json({ msg: 'Error during login' });
+    }
 });
 
 app.listen(port, '0.0.0.0', () => {
