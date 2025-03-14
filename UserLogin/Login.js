@@ -68,9 +68,10 @@ class Database {
                 result = { error: err.message };
             } else {
                 result = results;
+                this.close();
             }
         });
-        this.close();
+        
         return result;
     }
 
@@ -83,9 +84,10 @@ class Database {
                 result = { error: err.message };
             } else {
                 result = results;
+                this.close();
             }
         });
-        this.close();
+        
         return result;
     }
 }
