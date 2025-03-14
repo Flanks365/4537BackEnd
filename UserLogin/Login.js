@@ -24,51 +24,56 @@ app.options('*', cors({
 
 class Database {
     constructor() {
-        this.pool = null;
+        this.connection = null;
     }
 
-    // Establish a connection pool instead of a single connection
+    // Establish a connection to the database
     connect() {
-        if (!this.pool) {
-            this.pool = mysql.createPool({
+        if (!this.connection) {
+            this.connection = mysql.createConnection({
                 host: process.env.HOST,
                 user: process.env.USERNAME,
                 password: process.env.PASSWORD,
                 database: process.env.DATABASE,
-                port: process.env.PORT,
-                connectionLimit: 10,  // Maximum number of connections
-                waitForConnections: true,  // Wait for a connection if all are in use
-                connectTimeout: 10000,  // 10 seconds timeout
+                port: process.env.PORT
             });
 
-            console.log('Database pool connected');
-        }
-    }
-
-    // Close the connection pool
-    close() {
-        if (this.pool) {
-            this.pool.end((err) => {
+            this.connection.connect((err) => {
                 if (err) {
-                    console.error('Error closing database connection pool:', err);
+                    console.error('Error connecting to database:', err);
                 } else {
-                    console.log('Connection pool closed');
+                    console.log('Connected to database');
                 }
-                this.pool = null;
             });
         }
     }
 
-    // Query the database using async/await for better readability and error handling
-    async query(query, params) {
-        try {
-            this.connect(); // Ensure the pool is created before running any queries
-            const [results] = await this.pool.promise().query(query, params);
-            return results;
-        } catch (err) {
-            console.error('Error executing query:', err);
-            throw new Error('Error executing query');
+    // Close the connection to the database
+    close() {
+        if (this.connection) {
+            this.connection.end((err) => {
+                if (err) {
+                    console.error('Error closing database connection:', err);
+                } else {
+                    console.log('Connection to database closed');
+                }
+                this.connection = null;
+            });
         }
+    }
+
+    // Generic method to execute a query and return a promise with the result
+    async query(query, params = []) {
+        this.connect();  // Ensure the connection is established before executing the query
+        return new Promise((resolve, reject) => {
+            this.connection.query(query, params, (err, results) => {
+                if (err) {
+                    reject(err);  // Reject if there is an error with the query
+                } else {
+                    resolve(results);  // Resolve with the query results
+                }
+            });
+        });
     }
 }
 
