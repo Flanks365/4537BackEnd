@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
 require('dotenv').config();
 
@@ -12,7 +13,6 @@ class Database {
         this.connection = null;
     }
 
-   
     connect() {
         if (!this.connection) {
             this.connection = mysql.createConnection({
@@ -33,7 +33,6 @@ class Database {
         }
     }
 
-    
     close() {
         if (this.connection) {
             this.connection.end((err) => {
@@ -47,109 +46,78 @@ class Database {
         }
     }
 
-    
-    selectQuery(query, res) {
+    query(query, params, callback) {
         this.connect();
-
-        this.connection.query(query, (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ msg: "failed to execute" }));
-            } else {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(results));
-            }
-            this.close();
-        });
-    }
-
-    
-    insertQuery(query, res) {
-        this.connect();
-
-        this.connection.query(query, (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ msg: "failed"}));
-            } else {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ msg: "success" }));
-            }
+        this.connection.query(query, params, (err, results) => {
+            callback(err, results);
             this.close();
         });
     }
 }
 
-const database = new Database(); 
-
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
+const database = new Database();
+const SECRET_KEY = process.env.J;
 
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
     const saltRounds = 10;
 
-    database.selectQuery(`SELECT * FROM users WHERE username = '${username}'`, (err, results) => {
-        if (err) {
-            res.status(500).json({ msg: 'Error checking for duplicates' });
-        } else if (results.length > 0) {
-            res.status(400).json({ msg: 'Username already exists' });
-        } else {
-            bcrypt.hash(password, saltRounds, (err, hash) => {
-                if (err) {
-                    res.status(500).json({ msg: 'Error hashing password' });
-                } else {
-                    const insertQuery = `INSERT INTO users (username, password) VALUES ('${username}', '${hash}')`;
-                    database.insertQuery(insertQuery, res);
-                }
-            });
-        }
-    });
+    database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
+        if (err) return res.status(500).json({ msg: 'Error checking for duplicates' });
+        if (results.length > 0) return res.status(400).json({ msg: 'Username already exists' });
 
-    res.send('User signed up successfully!');
+        bcrypt.hash(password, saltRounds, (err, hash) => {
+            if (err) return res.status(500).json({ msg: 'Error hashing password' });
+
+            const insertQuery = `INSERT INTO users (username, password) VALUES (?, ?)`;
+            database.query(insertQuery, [username, hash], (err, result) => {
+                if (err) return res.status(500).json({ msg: 'Error inserting user' });
+
+                // Generate JWT token
+                const token = jwt.sign({ user_id: result.insertId }, SECRET_KEY, { expiresIn: '2h' });
+
+                // Insert the token into the validTokens table
+                database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, result.insertId], (err) => {
+                    if (err) return res.status(500).json({ msg: 'Error storing token' });
+
+                    res.status(201).json({ msg: 'User signed up successfully', token });
+                });
+            });
+        });
+    });
 });
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    
-    database.selectQuery(`SELECT * FROM users WHERE username = '${username}'`, (err, results) => {
-        
-        if (err) {
-            res.status(500).json({ msg: 'Error checking for user' });
-        } 
-        else if (results.length === 0) {
-            res.status(400).json({ msg: 'Username not found' });
-        } 
 
-        else {
+    database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
+        if (err) return res.status(500).json({ msg: 'Error checking for user' });
+        if (results.length === 0) return res.status(400).json({ msg: 'Username not found' });
 
-            const hashedPassword = results[0].password;
+        const user = results[0];
 
-            bcrypt.compare(password, hashedPassword, (err, result) => {
-                
-                if (err) {
-                    res.status(500).json({ msg: 'Error comparing passwords' });
-                } 
-                else if (result) {
-                    res.status(200).json({ msg: 'Login successful' });
-                } 
-                else {
-                    res.status(400).json({ msg: 'Incorrect password' });
-                }
+        bcrypt.compare(password, user.password, (err, match) => {
+            if (err) return res.status(500).json({ msg: 'Error comparing passwords' });
+            if (!match) return res.status(400).json({ msg: 'Incorrect password' });
+
+            // Generate JWT token
+            const token = jwt.sign({ user_id: user.id }, SECRET_KEY, { expiresIn: '2h' });
+
+            // Remove existing token for the user before inserting a new one
+            database.query(`DELETE FROM validTokens WHERE user_id = ?`, [user.id], (err) => {
+                if (err) return res.status(500).json({ msg: 'Error deleting old token' });
+
+                // Insert new token
+                database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, user.id], (err) => {
+                    if (err) return res.status(500).json({ msg: 'Error storing token' });
+
+                    res.status(200).json({ msg: 'Login successful', token });
+                });
             });
-        }
+        });
     });
-
-    res.send('User logged in successfully!');
 });
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${port}`);
 });
-
-
-
