@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
-const cors = require('cors'); // Importing cors
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
@@ -28,20 +28,23 @@ class Database {
     }
 
     connect() {
-        this.connection = mysql.createConnection({
-            host: process.env.HOST,
-            user: process.env.USERNAME,
-            password: process.env.PASSWORD,
-            database: process.env.DATABASE,
-            port: process.env.PORT
-        });
-
-        return new Promise((resolve, reject) => {
-            this.connection.connect((err) => {
-                if (err) reject('Error connecting to database: ' + err);
-                else resolve();
+        if (!this.connection) {
+            this.connection = mysql.createConnection({
+                host: process.env.HOST,
+                user: process.env.USER,
+                password: process.env.PASSWORD,
+                database: process.env.DATABASE,
+                port: process.env.PORT
             });
-        });
+
+            this.connection.connect((err) => {
+                if (err) {
+                    console.error('Error connecting to database:', err);
+                } else {
+                    console.log('Connected to database');
+                }
+            });
+        }
     }
 
     close() {
@@ -52,22 +55,24 @@ class Database {
                 } else {
                     console.log('Connection to database closed');
                 }
+                this.connection = null;
             });
-            this.connection = null;
         }
     }
 
-    async query(query, params, callback) {
-        try {
-            await this.connect();  // Ensure the connection is open
-            this.connection.query(query, params, (err, results) => {
-                callback(err, results);
-                this.close();  // Close connection after query
-            });
-        } catch (error) {
-            console.error(error);
-            callback(error, null);
-        }
+    query(query, params, callback) {
+        this.connect();  // Ensure the connection is open before running the query
+        this.connection.query(query, params, (err, results) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                callback(err, null);  // Pass the error to the callback
+            } else {
+                callback(null, results);  // Pass the results to the callback
+            }
+
+            // Close the connection after query execution
+            this.close();
+        });
     }
 }
 
