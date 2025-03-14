@@ -2,11 +2,18 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
+const cors = require('cors'); // Importing cors
 require('dotenv').config();
 
 const app = express();
 const port = 8080;
 app.use(express.json());
+
+// CORS configuration: Allow all origins and only POST methods
+app.use(cors({
+    origin: '*',  // Allow all origins
+    methods: ['POST'],  // Only allow POST methods
+}));
 
 class Database {
     constructor() {
