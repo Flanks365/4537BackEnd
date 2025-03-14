@@ -93,37 +93,42 @@ class Database {
 const db = new Database();
 
 app.post('/signup', (req, res) => {
+    console.log('Signup process started');
     const { email, password, name } = req.body;
     const role = 'student';  // Default role
 
-    // Define the number of salt rounds for bcrypt
     const saltRounds = 10;
 
+    console.log('Hashing password...');
     bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
+            console.error('Error hashing password:', err.message);
             res.status(500).json({ error: err.message });
         } else {
+            console.log('Password hashed successfully');
             const insertQuery = `INSERT INTO users (email, password, name, role) VALUES ('${email}', '${hash}', '${name}', '${role}')`;
+            console.log('Executing INSERT query...');
             const result = db.insertQuery(insertQuery);
 
             if (result.error) {
+                console.error('Error inserting user into database:', result.error);
                 res.status(500).json({ error: result.error });
             } else {
                 const userId = result.insertId;  // Getting the inserted user's ID
-
-                // Generate JWT token
+                console.log('User inserted, generating JWT token...');
                 const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
 
-                // Insert the token into validTokens table
+                console.log('Inserting token into validTokens table...');
                 db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`);
 
+                console.log('Signup process completed');
                 res.status(201).json({
                     token,
                     user: {
                         id: userId,
-                        email: result.email,
-                        name: result.name,
-                        role: result.role  // Return the role along with other user details
+                        email,
+                        name,
+                        role  // Return the role along with other user details
                     }
                 });
             }
@@ -132,34 +137,40 @@ app.post('/signup', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+    console.log('Login process started');
     const { email, password } = req.body;
 
+    console.log('Executing SELECT query to find user...');
     const query = `SELECT * FROM users WHERE email = '${email}'`;
     const result = db.selectQuery(query);
 
     if (result.error) {
+        console.error('Error executing SELECT query:', result.error);
         res.status(500).json({ error: result.error });
     } else if (result.length === 0) {
+        console.log('No user found with the provided email');
         res.status(401).json({ error: 'Invalid email or password' });
     } else {
         const user = result[0];
-
-        // Compare the provided password with the stored hashed password
+        console.log('User found, comparing passwords...');
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) {
+                console.error('Error comparing password:', err.message);
                 res.status(500).json({ error: err.message });
             } else if (!match) {
+                console.log('Password does not match');
                 res.status(401).json({ error: 'Invalid email or password' });
             } else {
-                // Generate JWT token
+                console.log('Password matched, generating JWT token...');
                 const token = jwt.sign({ id: user.id, email }, process.env.J, { expiresIn: '2h' });
 
-                // Remove any existing token for the user before inserting a new one
+                console.log('Removing existing token for the user...');
                 db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
 
-                // Insert the new token into the validTokens table
+                console.log('Inserting new token into validTokens table...');
                 db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${user.id}')`);
 
+                console.log('Login process completed');
                 res.status(200).json({
                     token,
                     user: {
@@ -173,9 +184,6 @@ app.post('/login', (req, res) => {
         });
     }
 });
-
-
-
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
