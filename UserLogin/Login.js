@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = 8080;
 app.use(express.json());
 
 class Database {
@@ -147,8 +147,8 @@ app.post('/login', (req, res) => {
     res.send('User logged in successfully!');
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${port}`);
 });
 
 
