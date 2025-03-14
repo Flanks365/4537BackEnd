@@ -59,18 +59,22 @@ const database = new Database();
 const SECRET_KEY = process.env.J;
 
 app.post('/signup', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, name } = req.body;
+    const role = 'student';  // Default role
     const saltRounds = 10;
 
+    // Check if the username (which is email) already exists
     database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
         if (err) return res.status(500).json({ msg: 'Error checking for duplicates' });
-        if (results.length > 0) return res.status(400).json({ msg: 'Username already exists' });
+        if (results.length > 0) return res.status(400).json({ msg: 'Username (email) already exists' });
 
+        // Hash the password before saving
         bcrypt.hash(password, saltRounds, (err, hash) => {
             if (err) return res.status(500).json({ msg: 'Error hashing password' });
 
-            const insertQuery = `INSERT INTO users (username, password) VALUES (?, ?)`;
-            database.query(insertQuery, [username, hash], (err, result) => {
+            // Insert the user into the users table
+            const insertQuery = `INSERT INTO users (username, password, name, role) VALUES (?, ?, ?, ?)`;
+            database.query(insertQuery, [username, hash, name, role], (err, result) => {
                 if (err) return res.status(500).json({ msg: 'Error inserting user' });
 
                 // Generate JWT token
@@ -80,7 +84,16 @@ app.post('/signup', (req, res) => {
                 database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, result.insertId], (err) => {
                     if (err) return res.status(500).json({ msg: 'Error storing token' });
 
-                    res.status(201).json({ msg: 'User signed up successfully', token });
+                    // Respond with token and user details
+                    res.status(201).json({
+                        token,
+                        user: {
+                            id: result.insertId,
+                            name: name,
+                            username: username,  // Treating username as email
+                            role: role
+                        }
+                    });
                 });
             });
         });
@@ -90,12 +103,14 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
+    // Fetch the user from the database (username is the email)
     database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
         if (err) return res.status(500).json({ msg: 'Error checking for user' });
-        if (results.length === 0) return res.status(400).json({ msg: 'Username not found' });
+        if (results.length === 0) return res.status(400).json({ msg: 'Username (email) not found' });
 
         const user = results[0];
 
+        // Compare the password with the stored hash
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) return res.status(500).json({ msg: 'Error comparing passwords' });
             if (!match) return res.status(400).json({ msg: 'Incorrect password' });
@@ -111,7 +126,16 @@ app.post('/login', (req, res) => {
                 database.query(`INSERT INTO validTokens (token, user_id) VALUES (?, ?)`, [token, user.id], (err) => {
                     if (err) return res.status(500).json({ msg: 'Error storing token' });
 
-                    res.status(200).json({ msg: 'Login successful', token });
+                    // Respond with token and user details
+                    res.status(200).json({
+                        token,
+                        user: {
+                            id: user.id,
+                            name: user.name,
+                            username: user.username,  // Treating username as email
+                            role: user.role
+                        }
+                    });
                 });
             });
         });
