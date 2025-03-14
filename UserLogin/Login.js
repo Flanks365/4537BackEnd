@@ -62,13 +62,12 @@ class Database {
     selectQuery(query) {
         this.connect();
         let result = null;
-        this.connection.query(query, (err, results) => {
+        this.connection.execute(query, (err, results) => {
             if (err) {
                 console.error('Error executing SELECT query:', err);
                 result = { error: err.message };
             } else {
                 result = results;
-                
             }
             this.close();
         });
@@ -79,13 +78,13 @@ class Database {
     insertQuery(query) {
         this.connect();
         let result = null;
-        this.connection.query(query, (err, results) => {
+        this.connection.execute(query, (err, results) => {
             if (err) {
                 console.error('Error executing INSERT query:', err);
                 result = { error: err.message };
             } else {
                 result = results;
-                
+            
             }
             this.close();
         });
