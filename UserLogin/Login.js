@@ -56,25 +56,25 @@ class Database {
 }
 
 const database = new Database();
-const SECRET_KEY = process.env.J;
+const SECRET_KEY = process.env.JWT_SECRET;
 
 app.post('/signup', (req, res) => {
-    const { username, password, name } = req.body;
+    const { email, password, name } = req.body;
     const role = 'student';  // Default role
     const saltRounds = 10;
 
-    // Check if the username (which is email) already exists
-    database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
+    // Check if the email already exists
+    database.query(`SELECT * FROM users WHERE email = ?`, [email], (err, results) => {
         if (err) return res.status(500).json({ msg: 'Error checking for duplicates' });
-        if (results.length > 0) return res.status(400).json({ msg: 'Username (email) already exists' });
+        if (results.length > 0) return res.status(400).json({ msg: 'Email already exists' });
 
         // Hash the password before saving
         bcrypt.hash(password, saltRounds, (err, hash) => {
             if (err) return res.status(500).json({ msg: 'Error hashing password' });
 
             // Insert the user into the users table
-            const insertQuery = `INSERT INTO users (username, password, name, role) VALUES (?, ?, ?, ?)`;
-            database.query(insertQuery, [username, hash, name, role], (err, result) => {
+            const insertQuery = `INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)`;
+            database.query(insertQuery, [email, hash, name, role], (err, result) => {
                 if (err) return res.status(500).json({ msg: 'Error inserting user' });
 
                 // Generate JWT token
@@ -90,7 +90,7 @@ app.post('/signup', (req, res) => {
                         user: {
                             id: result.insertId,
                             name: name,
-                            username: username,  // Treating username as email
+                            email: email,  // Using email now
                             role: role
                         }
                     });
@@ -101,12 +101,12 @@ app.post('/signup', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Fetch the user from the database (username is the email)
-    database.query(`SELECT * FROM users WHERE username = ?`, [username], (err, results) => {
+    // Fetch the user from the database (email is the key now)
+    database.query(`SELECT * FROM users WHERE email = ?`, [email], (err, results) => {
         if (err) return res.status(500).json({ msg: 'Error checking for user' });
-        if (results.length === 0) return res.status(400).json({ msg: 'Username (email) not found' });
+        if (results.length === 0) return res.status(400).json({ msg: 'Email not found' });
 
         const user = results[0];
 
@@ -132,7 +132,7 @@ app.post('/login', (req, res) => {
                         user: {
                             id: user.id,
                             name: user.name,
-                            username: user.username,  // Treating username as email
+                            email: user.email,  // Using email now
                             role: user.role
                         }
                     });
