@@ -12,13 +12,13 @@ app.use(express.json());
 // CORS configuration: Allow all origins and only POST methods, including OPTIONS pre-flight requests for POST
 app.use(cors({
     origin: '*',
-    methods: ['POST'],
+    methods: ['*'],
     allowedHeaders: ['Content-Type'],
 }));
 
 app.options('*', cors({
     origin: '*',
-    methods: ['POST'],
+    methods: ['*'],
 }));
 
 // Utility to create a new MySQL connection
