@@ -93,34 +93,40 @@ class Database {
 const db = new Database();
 
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    const query = `SELECT * FROM users WHERE username = '${username}'`;
+    const { email, password } = req.body;
+
+    const query = `SELECT * FROM users WHERE email = '${email}'`;
     const result = db.selectQuery(query);
 
     if (result.error) {
         res.status(500).json({ error: result.error });
     } else if (result.length === 0) {
-        res.status(401).json({ error: 'Invalid username or password' });
+        res.status(401).json({ error: 'Invalid email or password' });
     } else {
         const user = result[0];
+
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) {
                 res.status(500).json({ error: err.message });
             } else if (!match) {
-                res.status(401).json({ error: 'Invalid username or password' });
+                res.status(401).json({ error: 'Invalid email or password' });
             } else {
-                const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
+                // Generate JWT token
+                const token = jwt.sign({ id: user.id, email }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
 
-                // Insert the token into validTokens table
+                // Remove any existing token for the user before inserting a new one
+                db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
+
+                // Insert the new token into the validTokens table
                 db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${user.id}')`);
 
                 res.status(200).json({
                     token,
                     user: {
                         id: user.id,
-                        username: user.username,
-                        email: user.email,  // Include email or other data you wish
-                        role: user.role
+                        email: user.email,
+                        name: user.name,
+                        role: user.role  // Return the role along with other user details
                     }
                 });
             }
@@ -128,15 +134,16 @@ app.post('/login', (req, res) => {
     }
 });
 
+
 app.post('/signup', (req, res) => {
-    const { username, password, email, name } = req.body;
+    const { email, password, name } = req.body;
     const role = 'student';  // Default role
 
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            const insertQuery = `INSERT INTO users (username, password, email, name, role) VALUES ('${username}', '${hash}', '${email}', '${name}', '${role}')`;
+            const insertQuery = `INSERT INTO users (email, password, name, role) VALUES ('${email}', '${hash}', '${name}', '${role}')`;
             const result = db.insertQuery(insertQuery);
 
             if (result.error) {
@@ -145,7 +152,7 @@ app.post('/signup', (req, res) => {
                 const userId = result.insertId;  // Getting the inserted user's ID
 
                 // Generate JWT token
-                const token = jwt.sign({ id: userId, username }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
+                const token = jwt.sign({ id: userId, email }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
 
                 // Insert the token into validTokens table
                 db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`);
@@ -154,16 +161,16 @@ app.post('/signup', (req, res) => {
                     token,
                     user: {
                         id: userId,
-                        username,
-                        email,
-                        name,
-                        role  // Return the role along with other user details
+                        email: result.email,
+                        name: result.name,
+                        role: result.role  // Return the role along with other user details
                     }
                 });
             }
         }
     });
 });
+
 
 
 app.listen(port, () => {
