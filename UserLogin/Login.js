@@ -96,6 +96,7 @@ app.post('/signup', (req, res) => {
     console.log('Signup process started');
     const { email, password, name } = req.body;
     const role = 'student';  // Default role
+    console.log('Received request body:', req.body);
 
     const saltRounds = 10;
 
@@ -139,6 +140,7 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
     console.log('Login process started');
     const { email, password } = req.body;
+    console.log('Received request body:', req.body);
 
     console.log('Executing SELECT query to find user...');
     const query = `SELECT * FROM users WHERE email = '${email}'`;
