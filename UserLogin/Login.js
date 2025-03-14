@@ -70,8 +70,6 @@ class Database {
                 callback(null, results);  // Pass the results to the callback
             }
 
-            // Close the connection after query execution
-            this.close();
         });
     }
 }
