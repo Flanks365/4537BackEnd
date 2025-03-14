@@ -112,7 +112,7 @@ app.post('/login', (req, res) => {
                 res.status(401).json({ error: 'Invalid email or password' });
             } else {
                 // Generate JWT token
-                const token = jwt.sign({ id: user.id, email }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
+                const token = jwt.sign({ id: user.id, email }, process.env.J, { expiresIn: '2h' });
 
                 // Remove any existing token for the user before inserting a new one
                 db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
@@ -152,7 +152,7 @@ app.post('/signup', (req, res) => {
                 const userId = result.insertId;  // Getting the inserted user's ID
 
                 // Generate JWT token
-                const token = jwt.sign({ id: userId, email }, process.env.JWT_SECRET_KEY, { expiresIn: '2h' });
+                const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
 
                 // Insert the token into validTokens table
                 db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${userId}')`);
