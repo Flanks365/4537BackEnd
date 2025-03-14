@@ -116,7 +116,8 @@ app.post('/signup', (req, res) => {
 
             const selectquery = `SELECT * FROM users WHERE email = '${email}'`;
             const result = db.selectQuery(selectquery);
-
+            console.log(result);
+            
             const userId = result.id;  // Getting the inserted user's ID
             console.log('User inserted, generating JWT token...');
             const token = jwt.sign({ id: userId, email }, process.env.J, { expiresIn: '2h' });
@@ -147,6 +148,7 @@ app.post('/login', (req, res) => {
     console.log('Executing SELECT query to find user...');
     const query = `SELECT * FROM users WHERE email = '${email}'`;
     const result = db.selectQuery(query);
+    console.log(result);
 
     if (result.length === 0) {
         console.log('No user found with the provided email');
