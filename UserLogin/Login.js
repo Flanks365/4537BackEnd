@@ -2,10 +2,10 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2');
 require('dotenv').config();
-app.use(express.json());
 
 const app = express();
 const port = 3000;
+app.use(express.json());
 
 class Database {
     constructor() {
@@ -151,16 +151,5 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });
 
-function hashPass(text){
-    const salt = 10;
-    bcrypt.hash(text, salt, (err, hash) => {
-        if (err) {
-            console.error(err);
-            return null;
-        } else {
-            return hash;
-        }
-    });
 
-}
 
