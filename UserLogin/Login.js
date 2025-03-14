@@ -92,54 +92,14 @@ class Database {
 
 const db = new Database();
 
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    const query = `SELECT * FROM users WHERE email = '${email}'`;
-    const result = db.selectQuery(query);
-
-    if (result.error) {
-        res.status(500).json({ error: result.error });
-    } else if (result.length === 0) {
-        res.status(401).json({ error: 'Invalid email or password' });
-    } else {
-        const user = result[0];
-
-        bcrypt.compare(password, user.password, (err, match) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-            } else if (!match) {
-                res.status(401).json({ error: 'Invalid email or password' });
-            } else {
-                // Generate JWT token
-                const token = jwt.sign({ id: user.id, email }, process.env.J, { expiresIn: '2h' });
-
-                // Remove any existing token for the user before inserting a new one
-                db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
-
-                // Insert the new token into the validTokens table
-                db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${user.id}')`);
-
-                res.status(200).json({
-                    token,
-                    user: {
-                        id: user.id,
-                        email: user.email,
-                        name: user.name,
-                        role: user.role  // Return the role along with other user details
-                    }
-                });
-            }
-        });
-    }
-});
-
-
 app.post('/signup', (req, res) => {
     const { email, password, name } = req.body;
     const role = 'student';  // Default role
 
-    bcrypt.hash(password, 10, (err, hash) => {
+    // Define the number of salt rounds for bcrypt
+    const saltRounds = 10;
+
+    bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
@@ -170,6 +130,50 @@ app.post('/signup', (req, res) => {
         }
     });
 });
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    const query = `SELECT * FROM users WHERE email = '${email}'`;
+    const result = db.selectQuery(query);
+
+    if (result.error) {
+        res.status(500).json({ error: result.error });
+    } else if (result.length === 0) {
+        res.status(401).json({ error: 'Invalid email or password' });
+    } else {
+        const user = result[0];
+
+        // Compare the provided password with the stored hashed password
+        bcrypt.compare(password, user.password, (err, match) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+            } else if (!match) {
+                res.status(401).json({ error: 'Invalid email or password' });
+            } else {
+                // Generate JWT token
+                const token = jwt.sign({ id: user.id, email }, process.env.J, { expiresIn: '2h' });
+
+                // Remove any existing token for the user before inserting a new one
+                db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
+
+                // Insert the new token into the validTokens table
+                db.insertQuery(`INSERT INTO validTokens (token, user_id) VALUES ('${token}', '${user.id}')`);
+
+                res.status(200).json({
+                    token,
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role  // Return the role along with other user details
+                    }
+                });
+            }
+        });
+    }
+});
+
 
 
 
