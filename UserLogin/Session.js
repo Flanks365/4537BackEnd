@@ -1,5 +1,7 @@
 const express = require('express');
 const http = require('http');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
