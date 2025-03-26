@@ -109,7 +109,20 @@ server.listen(port, () => {
 });
 
 
-app.get()
+app.get('/', async (req, res) => {
+  try {
+    const results = await db.selectQuery('SELECT * FROM users');
+    res.json({
+      message: 'Database connection and query successful!',
+      data: results
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
 
 
 // Express route
