@@ -3,6 +3,7 @@ const http = require('http');
 
 const app = express();
 const server = http.createServer(app);
+const port = 8080;
 
 class Database {
   constructor() {
