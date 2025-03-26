@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 class Database {
   constructor() {
