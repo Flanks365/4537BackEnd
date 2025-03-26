@@ -106,10 +106,6 @@ class Database {
 
 const db = new Database();
 
-server.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
-
 
 app.get('/', async (req, res) => {
   console.log("GET /");
@@ -125,4 +121,8 @@ app.get('/', async (req, res) => {
       error: err.message
     });
   }
+});
+
+server.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
