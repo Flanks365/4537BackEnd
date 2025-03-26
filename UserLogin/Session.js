@@ -123,9 +123,3 @@ app.get('/', async (req, res) => {
     });
   }
 });
-
-
-// Express route
-app.get('/', (req, res) => {
-  res.send('WebSocket server is running!');
-});
