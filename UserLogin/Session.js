@@ -112,6 +112,7 @@ server.listen(port, () => {
 
 
 app.get('/', async (req, res) => {
+  console.log("GET /");
   try {
     const results = await db.selectQuery('SELECT * FROM users');
     res.json({
