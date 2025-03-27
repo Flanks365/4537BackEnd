@@ -168,14 +168,14 @@ async function logOut(req, res) {
 // Routing using Express
 class LoginUtils {
     static routeRequest(req, res) {
-        console.log('Routing request:', req.url);
-        if (req.url === '/login') {
+        console.log('Routing request:', req.originalUrl);  // Use originalUrl or path
+        if (req.originalUrl === '/login') {
             checkLogin(req, res);
-        } else if (req.url === '/signup') {
+        } else if (req.originalUrl === '/signup') {
             checkSignup(req, res);
-        } else if (req.url === '/checktoken') {
+        } else if (req.originalUrl === '/checktoken') {
             checkToken(req, res);
-        } else if (req.url === '/logout') {
+        } else if (req.originalUrl === '/logout') {
             logOut(req, res);
         } else {
             console.log('Invalid endpoint');
@@ -183,5 +183,4 @@ class LoginUtils {
         }
     }
 }
-
 module.exports = LoginUtils;
