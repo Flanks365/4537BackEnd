@@ -6,59 +6,31 @@ const Database = require('./database');
 const LoginUtils = require('./Login');
 const cors = require('cors');
 
-const allowedOrigins = [
-  'https://octopus-app-x9uen.ondigitalocean.app',
-  'https://my-memory-game2.netlify.app',
-  'https://seashell-app-ojo24.ondigitalocean.app',
-  'https://dolphin-app-nxbr6.ondigitalocean.app'
-];
-
-
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 8080;
 
 app.use(express.json());
 
+// Set up CORS to allow specific origin
 const corsOptions = {
-  origin: function (origin, callback) {
-      if (allowedOrigins.includes(origin)) {
-          callback(null, true); // Allow the origin
-      } else {
-          callback(new Error('CORS not allowed'), false); // Reject the origin
-      }
-  },
-  methods: 'GET, POST, PUT, DELETE, OPTIONS',
-  allowedHeaders: 'Content-Type, Authorization'
+  origin: 'https://octopus-app-x9uen.ondigitalocean.app',  // Allow this origin
+  methods: ['GET', 'POST'],  // Adjust as needed for allowed methods
+  credentials: true  // If you want to support cookies/session headers, set this to true
 };
 
-// Use CORS middleware in Express
-app.options('*', cors(corsOptions));  // Handle preflight requests for all routes
 app.use(cors(corsOptions));
-
 
 const db = new Database();
 const login = new LoginUtils();
 
-// create session
+// Create session
 
+// Session checker
 
+// Check if session is available via a boolean
 
-
-// session checker
-
-// check if session is available via a boolean
-
-
-
-// session destroyer
-
-
-// take 
-
-
-
-// 
+// Session destroyer
 
 app.get('/', async (req, res) => {
   console.log("GET /");
@@ -123,10 +95,6 @@ app.post('/checktoken', async (req, res) => {
     });
   }
 });
-
-
-
-
 
 server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
