@@ -3,6 +3,7 @@ const http = require('http');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 const Database = require('./database');
+const LoginUtils = require('./Login');
 
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 
 const db = new Database();
+const login = new LoginUtils();
 
 // create session
 
@@ -42,6 +44,54 @@ app.get('/', async (req, res) => {
       message: 'Database connection and query successful!',
       data: results
     });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.get('/signup', async (req, res) => {
+  console.log("GET /signup");
+  try {
+    login.routeRequest(req, res);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.get('/login', async (req, res) => {
+  console.log("GET /login");
+  try {
+    login.routeRequest(req, res);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.get('/logout', async (req, res) => {
+  console.log("GET /logout");
+  try {
+    login.routeRequest(req, res);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.get('/checktoken', async (req, res) => {
+  console.log("GET /checkToken");
+  try {
+    login.routeRequest(req, res);
   } catch (err) {
     res.status(500).json({
       message: 'Error connecting to the database or executing query',

@@ -142,9 +142,9 @@ class LoginUtils {
             checkLogin(req, res);
         } else if (req.url === '/signup') {
             checkSignup(req, res);
-        } else if (req.url === '/checkToken') {
+        } else if (req.url === '/checktoken') {
             checkToken(req, res);
-        } else if (req.url === '/logOut') {
+        } else if (req.url === '/logout') {
             logOut(req, res);
         } else {
             console.log('Invalid endpoint');
