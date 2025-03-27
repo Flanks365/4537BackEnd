@@ -32,6 +32,7 @@ const corsOptions = {
 };
 
 // Use CORS middleware in Express
+app.options('*', cors(corsOptions));  // Handle preflight requests for all routes
 app.use(cors(corsOptions));
 
 
