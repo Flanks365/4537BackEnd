@@ -52,7 +52,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/signup', async (req, res) => {
+app.post('/signup', async (req, res) => {
   console.log("GET /signup");
   try {
     login.routeRequest(req, res);
@@ -64,7 +64,7 @@ app.get('/signup', async (req, res) => {
   }
 });
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   console.log("GET /login");
   try {
     login.routeRequest(req, res);
@@ -76,7 +76,7 @@ app.get('/login', async (req, res) => {
   }
 });
 
-app.get('/logout', async (req, res) => {
+app.post('/logout', async (req, res) => {
   console.log("GET /logout");
   try {
     login.routeRequest(req, res);
@@ -88,7 +88,7 @@ app.get('/logout', async (req, res) => {
   }
 });
 
-app.get('/checktoken', async (req, res) => {
+app.post('/checktoken', async (req, res) => {
   console.log("GET /checkToken");
   try {
     login.routeRequest(req, res);
