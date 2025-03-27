@@ -4,8 +4,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const Database = require('./database');
 
-const privateKey = Buffer.from(process.env.JWT_PRIVATE_KEY_64, 'base64').toString('utf8');
-const publicKey = process.env.JWT_PUBLIC_KEY;
+const secretKey = process.env.JWT_SECRET_KEY;
 const db = new Database();
 
 async function checkLogin(req, res) {
@@ -15,36 +14,25 @@ async function checkLogin(req, res) {
 
         // Directly inserting email into the query string (not recommended!)
         const query = `SELECT id, name, role, password FROM users WHERE email = '${email}'`;
-        const result = await db.selectQuery(query);  // assuming selectQuery handles this safely
-
-        console.log('Database query result:', result);
+        const result = await db.selectQuery(query);
 
         if (result.length === 0) {
-            console.log('Email not found in database');
             return res.status(401).json({ msg: 'Invalid email or password' });
         }
 
         const user = result[0];
-        console.log(`User found: ${user.name}, role: ${user.role}`);
-
-        // Check password match
         const match = await bcrypt.compare(password, user.password);
-        console.log('Password match result:', match);
 
         if (!match) {
-            console.log('Password mismatch');
             return res.status(401).json({ msg: 'Invalid email or password' });
         }
 
         // Delete any existing token for the user
-        console.log('Deleting existing tokens for user');
         await db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
 
-        // Generate JWT
-        console.log('Generating new JWT token');
-        const token = jwt.sign({ email, role: user.role }, privateKey, { algorithm: 'RS256', expiresIn: '3h' });
+        // Generate JWT using HMAC (HS256)
+        const token = jwt.sign({ email, role: user.role }, secretKey, { algorithm: 'HS256', expiresIn: '3h' });
 
-        console.log('Inserting new token into database');
         await db.insertQuery(`INSERT INTO validTokens (user_id, token) VALUES ('${user.id}', '${token}')`);
 
         res.json({
@@ -59,46 +47,32 @@ async function checkLogin(req, res) {
     }
 }
 
-
 async function checkSignup(req, res) {
     try {
         const { name, email, password } = req.body;
-        console.log(`Checking signup for email: ${email}`);
 
-        // Directly inserting email into the query string (not recommended!)
         const checkEmailQuery = `SELECT id FROM users WHERE email = '${email}'`;
         const result = await db.selectQuery(checkEmailQuery);
 
-        console.log('Email check result:', result);
-
         if (result.length > 0) {
-            console.log('Email already exists');
             return res.status(400).json([{ msg: 'Duplicate email' }]);
         }
 
-        console.log('Hashing password');
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Directly inserting values into the query string (not recommended!)
         const query = `INSERT INTO users (name, email, password, role) VALUES ('${name}', '${email}', '${hashedPassword}', 'student')`;
         await db.insertQuery(query);
 
         const userResult = await db.selectQuery(`SELECT id, role FROM users WHERE email = '${email}'`);
 
-        console.log('User query result:', userResult);
-
         if (userResult.length === 0) {
-            console.log('User not found after signup');
             return res.status(404).json({ msg: 'User not found after signup' });
         }
 
         const userId = userResult[0].id;
         const userRole = userResult[0].role;
 
-        console.log('Generating JWT token for new user');
-        const token = jwt.sign({ email, role: userRole }, privateKey, { algorithm: 'RS256', expiresIn: '3h' });
+        const token = jwt.sign({ email, role: userRole }, secretKey, { algorithm: 'HS256', expiresIn: '3h' });
 
-        console.log('Inserting new token into database');
         await db.insertQuery(`INSERT INTO validTokens (user_id, token) VALUES ('${userId}', '${token}')`);
 
         res.json({
@@ -113,35 +87,24 @@ async function checkSignup(req, res) {
     }
 }
 
-
 async function checkToken(req, res) {
     const { token } = req.body;
     if (!token) {
-        console.log('No token provided');
         return res.status(400).json({ msg: 'No token provided' });
     }
 
     try {
-        console.log('Verifying token');
-        const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+        const decoded = jwt.verify(token, secretKey, { algorithms: ['HS256'] });
 
-        console.log('Decoded token:', decoded);
-
-        // Directly inserting token into the query string (not recommended!)
         const tokenResult = await db.selectQuery(`SELECT * FROM validTokens WHERE token = '${token}'`);
-        console.log('Token validation result:', tokenResult);
 
         if (tokenResult.length === 0) {
-            console.log('Token is invalid');
             return res.status(401).json({ msg: 'Invalid token' });
         }
 
-        // Directly inserting user_id into the query string (not recommended!)
         const userResult = await db.selectQuery(`SELECT id, name, email, role FROM users WHERE id = '${tokenResult[0].user_id}'`);
-        console.log('User query result:', userResult);
 
         if (userResult.length === 0) {
-            console.log('User not found for valid token');
             return res.status(404).json({ msg: 'User not found' });
         }
 
@@ -156,17 +119,13 @@ async function checkToken(req, res) {
     }
 }
 
-
 async function logOut(req, res) {
     const { token } = req.body;
     if (!token) {
-        console.log('No token provided for logout');
         return res.status(400).json({ msg: 'No token provided' });
     }
 
     try {
-        console.log('Deleting token from database');
-        // Directly inserting token into the query string (not recommended!)
         await db.deleteQuery(`DELETE FROM validTokens WHERE token = '${token}'`);
         res.json({ msg: 'Successfully logged out' });
     } catch (err) {
@@ -174,7 +133,6 @@ async function logOut(req, res) {
         res.status(500).json({ msg: 'Error during logout' });
     }
 }
-
 
 // Routing using Express
 class LoginUtils {
