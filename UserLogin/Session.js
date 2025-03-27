@@ -22,7 +22,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const db = new Database();
-const login = new LoginUtils();
+const login = LoginUtils;  // No instantiation needed if methods are static
+
 
 // Create session
 
