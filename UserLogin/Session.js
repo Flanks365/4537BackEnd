@@ -10,7 +10,7 @@ const allowedOrigins = [
   'https://octopus-app-x9uen.ondigitalocean.app',
   'https://my-memory-game2.netlify.app',
   'https://seashell-app-ojo24.ondigitalocean.app',
-  'https://dolphin-app-nxbr6.ondigitalocean.app/'
+  'https://dolphin-app-nxbr6.ondigitalocean.app'
 ];
 
 
