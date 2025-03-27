@@ -185,6 +185,7 @@ class LoginUtils {
         } else if (req.originalUrl === '/signup') {
             checkSignup(req, res);
         } else if (req.originalUrl === '/checktoken') {
+            console.log('In /checktoken route');
             checkToken(req, res);
         } else if (req.originalUrl === '/logout') {
             logOut(req, res);
