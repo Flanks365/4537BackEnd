@@ -90,7 +90,7 @@ class SessionTeacherUtils{
             const { sessionId } = req.body;
             
             // Parameterized query to prevent SQL injection
-            const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = ${sessionId}`;
+            const updateQuery = `UPDATE Session SET is_active = false WHERE id = ${sessionId}`;
             console.log(`Attempting to deactivate session with code: ${sessionId}`);
             
             // Execute query with error handling
@@ -98,7 +98,7 @@ class SessionTeacherUtils{
             
             // Check if any rows were affected
             if (result.rowCount === 0) {
-                console.warn(`Warning: No session found with code: ${sessionCode}`);
+                console.warn(`Warning: No session found with code: ${sessionId}`);
             }
     
             console.log(`Success: Session with code ${sessionId} marked as inactive. Rows affected: ${result.rowCount}`);
