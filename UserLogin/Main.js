@@ -80,10 +80,10 @@ app.post('/checksession', async (req, res) => {
 app.post('/destroysession', async (req, res) => {
   console.log("GET /destroysession");
   try {
-    const res = await session.destroySession(req, res);
+    const result = await session.destroySession(req, res);
     res.json({
       msg: 'Session destroyed successfully!',
-      is_active: res
+      is_active: result
     });
   } catch (err) {
     res.status(500).json({
