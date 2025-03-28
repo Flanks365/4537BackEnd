@@ -1,6 +1,9 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
+const secretKey = process.env.JWT_SECRET_KEY;
 const Database = require('./database');
 const db = new Database();
 
@@ -230,8 +233,9 @@ class SessionStudentUtils{
     //recieve answer
     static async recieveAnswer(req,res){
         console.log('Receiving answer...');
-        const {userId,questionId, answer} = req.body;
+        const {token,questionId, answer} = req.body;
 
+        const userId = jwt.decode(token).userId;
         // here do correctness logic / api call to ai
         let correct_val = 0.5;
 
