@@ -83,24 +83,22 @@ class SessionTeacherUtils{
     static async destroySession(req, res) {
         try {
             // Validate request body
-            if (!req.body || !req.body.sessionCode) {
+            if (!req.body || !req.body.sessionId) {
                 console.error('Error: Missing sessionCode in request body');
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'Session code is required' 
+                    message: 'Session Id is required' 
                 });
             }
     
-            const { sessionCode } = req.body;
+            const { sessionId } = req.body;
             
             // Parameterized query to prevent SQL injection
-            const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = $1`;
-            const params = [sessionCode];
-    
-            console.log(`Attempting to deactivate session with code: ${sessionCode}`);
+            const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = ${sessionId}`;
+            console.log(`Attempting to deactivate session with code: ${sessionId}`);
             
             // Execute query with error handling
-            const result = await db.insertQuery(updateQuery, params);
+            const result = await db.insertQuery(updateQuery);
             
             // Check if any rows were affected
             if (result.rowCount === 0) {
@@ -111,7 +109,7 @@ class SessionTeacherUtils{
                 });
             }
     
-            console.log(`Success: Session with code ${sessionCode} marked as inactive. Rows affected: ${result.rowCount}`);
+            console.log(`Success: Session with code ${sessionId} marked as inactive. Rows affected: ${result.rowCount}`);
             
             return res.status(200).json({ 
                 success: true, 
