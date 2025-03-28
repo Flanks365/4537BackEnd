@@ -233,6 +233,7 @@ class SessionStudentUtils{
         const {userId,questionId, answer} = req.body;
 
         // here do correctness logic / api call to ai
+        let correct_val = 0.5;
 
         console.log(`Inserting answer: ${answer}`);
         const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ( '${answer}', 0.5, '${questionId}', '${userId}')`;
