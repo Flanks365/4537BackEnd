@@ -33,7 +33,7 @@ class SessionTeacherUtils{
         }
 
         console.log(`Inserting new session with code: ${randomCode}`);
-        const insertQuery = `INSERT INTO Session (code, is_active) VALUES ('${randomCode}', true)`;
+        const insertQuery = `INSERT INTO Session (session_code, is_active) VALUES ('${randomCode}', true)`;
         await db.insertQuery(insertQuery);
 
         const sessionQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
