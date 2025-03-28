@@ -22,13 +22,13 @@ class SessionTeacherUtils{
 
         let randomCode = this.prototype.generateRandomCode();
 
-        let selectQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+        let selectQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
         let result = await db.selectQuery(selectQuery);
 
         while(result.length > 0) {
             console.log(`Code ${randomCode} already exists. Generating a new one.`);
             randomCode = this.prototype.generateRandomCode();
-            selectQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+            selectQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
             result = await db.selectQuery(selectQuery);
         }
 
@@ -36,7 +36,7 @@ class SessionTeacherUtils{
         const insertQuery = `INSERT INTO Session (code, is_active) VALUES ('${randomCode}', true)`;
         await db.insertQuery(insertQuery);
 
-        const sessionQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+        const sessionQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
         const sessionResult = await db.selectQuery(sessionQuery);
 
         if (sessionResult.length === 0) {
@@ -68,7 +68,7 @@ class SessionTeacherUtils{
     static async checkSession(req, res) {
         console.log('Checking session...');
         const { sessionCode } = req.body;
-        const selectQuery = `SELECT * FROM Session WHERE code = '${sessionCode}'`;
+        const selectQuery = `SELECT * FROM Session WHERE session_code = '${sessionCode}'`;
         const result = await db.selectQuery(selectQuery);
 
         if (result.length === 0) {
@@ -83,7 +83,7 @@ class SessionTeacherUtils{
     static async destroySession(req, res) {
         console.log('Destroying session...');
         const { sessionCode } = req.body;
-        const updateQuery = `UPDATE Session SET is_active = false WHERE code = '${sessionCode}'`;
+        const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = '${sessionCode}'`;
         await db.insertQuery(updateQuery);
         console.log(`Session with code ${sessionCode} marked as inactive.`);
         return true;
