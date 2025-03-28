@@ -1,102 +1,137 @@
-const express = require('express');
-const http = require('http');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+
 const Database = require('./database');
-const LoginUtils = require('./Login');
-const cors = require('cors');
-
-const app = express();
-const server = http.createServer(app);
-const port = process.env.PORT || 8080;
-
-app.use(express.json());
-
-// Set up CORS to allow specific origin
-const corsOptions = {
-  origin: 'https://octopus-app-x9uen.ondigitalocean.app',  // Allow this origin
-  methods: ['GET', 'POST'],  // Adjust as needed for allowed methods
-  credentials: true  // If you want to support cookies/session headers, set this to true
-};
-
-app.use(cors(corsOptions));
-
+const { Session } = require('express-session');
 const db = new Database();
-const login = LoginUtils;  // No instantiation needed if methods are static
+
+class SessionTeacherUtils{
 
 
-// Create session
+    generateRandomCode() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let code = '';
+        for (let i = 0; i < 4; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            code += characters[randomIndex];
+        }
+        return code;
+    }
 
-// Session checker
+    static async createSession(req, res) {
+        // function gets callled. no payload
+        // function generates a 4 char random code only alphanumeiric characters
 
-// Check if session is available via a boolean
+        let randomCode = generateRandomCode();
 
-// Session destroyer
+        // function checks if the code already exists in the database
+        // if it does, generate a new code and check again
+        const selectQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+        let result = await db.selectQuery(selectQuery);
 
-app.get('/', async (req, res) => {
-  console.log("GET /");
-  try {
-    const results = await db.selectQuery('SELECT * FROM users');
-    res.json({
-      message: 'Database connection and query successful!',
-      data: results
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
-  }
-});
+        while(result.length > 0) {
+            randomCode = generateRandomCode();
+            const selectQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+            result = await db.selectQuery(selectQuery);
+        }
+        // if it does not, insert the code into the database
+        // and sets the session is_active to true
 
-app.post('/signup', async (req, res) => {
-  console.log("GET /signup");
-  try {
-    login.routeRequest(req, res);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
-  }
-});
+        const insertQuery = `INSERT INTO Session (code, is_active) VALUES ('${randomCode}', true)`;
+        await db.insertQuery(insertQuery);
 
-app.post('/login', async (req, res) => {
-  console.log("GET /login");
-  try {
-    login.routeRequest(req, res);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
-  }
-});
+        // Get the newly created session ID (adjust based on your DB implementation)
+        const sessionQuery = `SELECT * FROM Session WHERE code = '${randomCode}'`;
+        const sessionResult = await db.selectQuery(sessionQuery);
 
-app.post('/logout', async (req, res) => {
-  console.log("GET /logout");
-  try {
-    login.routeRequest(req, res);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
-  }
-});
+        if (sessionResult.length === 0) {
+            throw new Error('Session creation failed');
+        }
 
-app.post('/checktoken', async (req, res) => {
-  console.log("GET /checkToken");
-  try {
-    login.routeRequest(req, res);
-  } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
-  }
-});
+        const sessionId = sessionResult.id;
+    
+        // Get the user ID (you'll need to adjust this based on how you store user info)
 
-server.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+        const userToken = req.token; 
+        const userSelectQuery = `SELECT * FROM validTokens WHERE token = '${userToken}'`;
+
+        const userResult = await db.selectQuery(userSelectQuery);
+
+        if (userResult.length === 0) {
+            throw new Error('User not found');
+        }
+
+        const userId = userResult[0].user_id;
+    
+        // Insert into UserSession table
+        const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
+        await db.insertQuery(userSessionQuery);
+
+        return {code: randomCode, sessionId: sessionId};
+
+    }
+
+    static async checkSession(req, res) {
+        const { sessionCode } = req.body;
+        const selectQuery = `SELECT * FROM Session WHERE code = '${sessionCode}'`;
+        const result = await db.selectQuery(selectQuery);
+
+        if (result.length === 0) {
+            return false;
+        }
+
+        return result[0].is_active;
+    }
+
+    static async destroySession(req, res) {
+        const { sessionCode } = req.body;
+        const updateQuery = `UPDATE Session SET is_active = false WHERE code = '${sessionCode}'`;
+        await db.insertQuery(updateQuery);
+
+        return true;
+    }
+
+    static async recieveQuestions(req,res){
+        const { sessionId, question } = req.body;
+
+        const insertQuery = `INSERT INTO Question (session_id, text) VALUES ('${sessionId}', '${question}')`;
+        await db.insertQuery(insertQuery);
+
+        const selectQuery = `SELECT * FROM Question WHERE text = '${question}'`;
+        const result = await db.selectQuery(selectQuery);
+        if (result.length === 0) {
+            throw new Error('Question insertion failed');
+        }
+        const questionId = result[0].id;
+
+        return questionId;
+    }
+
+    static async retrieveAnswers(req,res){
+        const {questionId} = req.body;
+
+        const selectQuery = `
+                SELECT Answer.id, Answer.text, Answer.correctness, Users.name 
+                FROM Answer
+                JOIN Users ON Answer.user_id = Users.id
+                WHERE Answer.question_id = '${questionId}'
+        `;
+
+        const result = await db.selectQuery(selectQuery);
+
+        if (result.length === 0) {
+            throw new Error('Answer Retrivel failed');
+        }
+
+        return result;
+    }
+}
+
+class SessionStudentUtils{
+
+}
+
+module.exports = {
+    SessionTeacherUtils,
+    SessionStudentUtils
+};
