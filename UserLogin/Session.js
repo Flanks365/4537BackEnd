@@ -173,9 +173,9 @@ class SessionTeacherUtils{
         console.log(`Fetching answers for question ID: ${questionId}`);
 
         const selectQuery = `
-            SELECT Answer.id, Answer.text, Answer.correctness, Users.name 
+            SELECT Answer.id, Answer.text, Answer.correctness, users.name 
             FROM Answer
-            JOIN Users ON Answer.user_id = Users.id
+            JOIN users ON Answer.user_id = users.id
             WHERE Answer.question_id = '${questionId}'
         `;
 
