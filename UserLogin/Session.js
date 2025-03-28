@@ -113,7 +113,7 @@ class SessionTeacherUtils{
 
     static async endQuestion(req,res){
         const { sessionId } = req.body;
-        
+
         // check if there is an active question in the session
         // and the question curr_question columns = true
         // if there is, set it to false
@@ -128,7 +128,14 @@ class SessionTeacherUtils{
     }
 
     static async retrieveAnswers(req,res){
-        const {questionId} = req.body;
+        const {sessionId} = req.body;
+
+        const questionQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+        const questionResult = await db.selectQuery(questionQuery);
+        if (questionResult.length === 0) {
+            throw new Error('No active question found');
+        }
+        const questionId = questionResult[0].id;
 
         const selectQuery = `
                 SELECT Answer.id, Answer.text, Answer.correctness, Users.name 
