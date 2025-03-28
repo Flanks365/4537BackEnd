@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 const Database = require('./database');
 const LoginUtils = require('./Login');
-const { SessionTeacherUtils } = require('./Session');
+const { SessionTeacherUtils, SessionStudentUtils } = require('./Session');
 const cors = require('cors');
 
 const app = express();
@@ -25,6 +25,7 @@ app.use(cors(corsOptions));
 const db = new Database();
 const login = LoginUtils;  // No instantiation needed if methods are static
 const session = SessionTeacherUtils
+const sessionStudent = SessionStudentUtils
 
 
 app.get('/', async (req, res) => {
@@ -59,6 +60,57 @@ app.post("/createsession", async (req, res) => {
     });
   }
 });
+
+app.post('/joinsession', async (req, res) => {
+  console.log("GET /joinsession");
+  try {
+    const result = await sessionStudent.joinSession(req,res);
+    res.json({
+      msg: 'Session joined successfully!',
+      sessionId: result.sessionId
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.post('/retrivequestion', async (req, res) => {
+  console.log("GET /retrivequestion");
+  try {
+    const question = await sessionStudent.retrieveQuestion(req,res);
+    res.json({
+      msg: 'Question retrieved successfully!',
+      question: question
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.post('/recieveanswer', async (req, res) => {
+  console.log("GET /recieveanswer");
+  try {
+    const result = await sessionStudent.recieveAnswer(req,res);
+    res.json({
+      msg: 'Answer received successfully!',
+      result: result
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+
+
 
 app.post('/checksession', async (req, res) => {
   console.log("GET /checksession");
