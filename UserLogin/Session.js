@@ -94,6 +94,10 @@ class SessionTeacherUtils{
     static async recieveQuestions(req,res){
         const { sessionId, question } = req.body;
 
+        //check if there is an active question in the session
+        // and the question curr_question columns = true
+        this.endQuestion(req,res);
+        // insert the new question
         const insertQuery = `INSERT INTO Question (session_id, text) VALUES ('${sessionId}', '${question}')`;
         await db.insertQuery(insertQuery);
 
@@ -105,6 +109,22 @@ class SessionTeacherUtils{
         const questionId = result[0].id;
 
         return questionId;
+    }
+
+    static async endQuestion(req,res){
+        const { sessionId } = req.body;
+        
+        // check if there is an active question in the session
+        // and the question curr_question columns = true
+        // if there is, set it to false
+
+        const checkQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+        const checkResult = await db.selectQuery(checkQuery);
+        if (checkResult.length > 0) {
+            // turn it off
+            const updateQuery = `UPDATE Question SET curr_question = false WHERE session_id = '${sessionId}' AND curr_question = true`;
+            await db.insertQuery(updateQuery);
+        }
     }
 
     static async retrieveAnswers(req,res){

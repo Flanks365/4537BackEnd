@@ -93,6 +93,38 @@ app.post('/destroysession', async (req, res) => {
   }
 });
 
+app.post('/confirmquestion', async (req, res) => {
+  console.log("GET /confirmquestion");
+  try {
+    const questionId = await session.recieveQuestions(req, res);
+    res.json({
+      msg: 'Question confirmed successfully!',
+      questionId: questionId
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+}
+);
+
+app.post('/endquestion', async (req, res) => {
+  console.log("GET /endquestion");
+  try {
+    await session.endQuestion(req, res);
+    res.json({
+      msg: 'Question ended successfully!'
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
 app.post('/signup', async (req, res) => {
   console.log("GET /signup");
   try {
