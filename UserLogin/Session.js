@@ -182,8 +182,7 @@ class SessionTeacherUtils{
         const result = await db.selectQuery(selectQuery);
 
         if (result.length === 0) {
-            console.error('Answer retrieval failed');
-            throw new Error('Answer retrieval failed');
+            return { name: "No answers found" };
         }
 
         console.log(`Retrieved ${result.length} answers.`);
