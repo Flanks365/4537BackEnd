@@ -138,14 +138,14 @@ async function logOut(req, res) {
 class LoginUtils {
     static routeRequest(req, res) {
         console.log('Routing request:', req.originalUrl);  // Use originalUrl or path
-        if (req.originalUrl === '/login') {
+        if (req.originalUrl === '/api/v1/login') {
             checkLogin(req, res);
-        } else if (req.originalUrl === '/signup') {
+        } else if (req.originalUrl === '/api/v1/signup') {
             checkSignup(req, res);
-        } else if (req.originalUrl === '/checktoken') {
+        } else if (req.originalUrl === '/api/v1/checktoken') {
             console.log('In /checktoken route');
             checkToken(req, res);
-        } else if (req.originalUrl === '/logout') {
+        } else if (req.originalUrl === '/api/v1/logout') {
             logOut(req, res);
         } else {
             console.log('Invalid endpoint');
