@@ -165,8 +165,7 @@ class SessionTeacherUtils{
         const questionResult = await db.selectQuery(questionQuery);
 
         if (questionResult.length === 0) {
-            console.error('No active question found');
-            throw new Error('No active question found');
+            return [];
         }
 
         const questionId = questionResult[0].id;
