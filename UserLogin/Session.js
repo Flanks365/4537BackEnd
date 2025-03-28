@@ -196,7 +196,9 @@ class SessionStudentUtils{
 
     //join
     static async joinSession(req,res){
-        const {session_code, userId} = req.body;
+        const {session_code, token} = req.body;
+
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
 
         console.log(`Joining session with code: ${session_code} for user ID: ${userId}`);
         const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
