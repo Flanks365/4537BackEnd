@@ -235,7 +235,7 @@ class SessionStudentUtils{
         console.log('Receiving answer...');
         const {token,questionId, answer} = req.body;
 
-        const userId = jwt.decode(token).userId;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
         // here do correctness logic / api call to ai
         let correct_val = 0.5;
 
