@@ -47,7 +47,7 @@ class SessionTeacherUtils{
         const sessionId = sessionResult[0].id;
         console.log(`Session created successfully with ID: ${sessionId}`);
 
-        const userToken = req.token; 
+        const userToken = req.body.token; 
         const userSelectQuery = `SELECT * FROM validTokens WHERE token = '${userToken}'`;
         const userResult = await db.selectQuery(userSelectQuery);
 
