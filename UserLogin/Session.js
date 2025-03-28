@@ -85,10 +85,6 @@ class SessionTeacherUtils{
             // Validate request body
             if (!req.body || !req.body.sessionId) {
                 console.error('Error: Missing sessionCode in request body');
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Session Id is required' 
-                });
             }
     
             const { sessionId } = req.body;
@@ -103,42 +99,22 @@ class SessionTeacherUtils{
             // Check if any rows were affected
             if (result.rowCount === 0) {
                 console.warn(`Warning: No session found with code: ${sessionCode}`);
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Session not found' 
-                });
             }
     
             console.log(`Success: Session with code ${sessionId} marked as inactive. Rows affected: ${result.rowCount}`);
             
-            return res.status(200).json({ 
-                success: true, 
-                message: 'Session deactivated successfully',
-                sessionCode: sessionCode
-            });
+            return true
     
         } catch (error) {
             console.error('Error in destroySession:', error);
             
             // Differentiate between database errors and other errors
             if (error.code && error.code.startsWith('22') || error.code.startsWith('23')) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Database constraint violation',
-                    error: error.message 
-                });
+                console.log('Database error:', error);
             } else if (error.code === 'ECONNREFUSED') {
-                return res.status(503).json({ 
-                    success: false, 
-                    message: 'Database connection error',
-                    error: 'Service unavailable' 
-                });
+                console.log('Database connection refused:', error);
             } else {
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Internal server error',
-                    error: error.message 
-                });
+                console.log('Unexpected error:', error);
             }
         }
     }
