@@ -159,7 +159,7 @@ class SessionTeacherUtils{
 
     static async retrieveAnswers(req,res){
         console.log('Retrieving answers for active question...');
-        const { sessionId } = req.body;
+        const sessionId = req.body.sessionId;
 
         const questionQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
         const questionResult = await db.selectQuery(questionQuery);
