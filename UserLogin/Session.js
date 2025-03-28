@@ -81,12 +81,68 @@ class SessionTeacherUtils{
     }
 
     static async destroySession(req, res) {
-        console.log('Destroying session...');
-        const { sessionCode } = req.body;
-        const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = '${sessionCode}'`;
-        await db.insertQuery(updateQuery);
-        console.log(`Session with code ${sessionCode} marked as inactive.`);
-        return true;
+        try {
+            // Validate request body
+            if (!req.body || !req.body.sessionCode) {
+                console.error('Error: Missing sessionCode in request body');
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Session code is required' 
+                });
+            }
+    
+            const { sessionCode } = req.body;
+            
+            // Parameterized query to prevent SQL injection
+            const updateQuery = `UPDATE Session SET is_active = false WHERE session_code = $1`;
+            const params = [sessionCode];
+    
+            console.log(`Attempting to deactivate session with code: ${sessionCode}`);
+            
+            // Execute query with error handling
+            const result = await db.insertQuery(updateQuery, params);
+            
+            // Check if any rows were affected
+            if (result.rowCount === 0) {
+                console.warn(`Warning: No session found with code: ${sessionCode}`);
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Session not found' 
+                });
+            }
+    
+            console.log(`Success: Session with code ${sessionCode} marked as inactive. Rows affected: ${result.rowCount}`);
+            
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Session deactivated successfully',
+                sessionCode: sessionCode
+            });
+    
+        } catch (error) {
+            console.error('Error in destroySession:', error);
+            
+            // Differentiate between database errors and other errors
+            if (error.code && error.code.startsWith('22') || error.code.startsWith('23')) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Database constraint violation',
+                    error: error.message 
+                });
+            } else if (error.code === 'ECONNREFUSED') {
+                return res.status(503).json({ 
+                    success: false, 
+                    message: 'Database connection error',
+                    error: 'Service unavailable' 
+                });
+            } else {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Internal server error',
+                    error: error.message 
+                });
+            }
+        }
     }
 
     static async recieveQuestions(req,res){
