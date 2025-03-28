@@ -125,6 +125,22 @@ app.post('/endquestion', async (req, res) => {
   }
 });
 
+app.post('/getanswers', async (req, res) => {
+  console.log("GET /getanswers");
+  try {
+    const answers = await session.retrieveAnswers(req, res);
+    res.json({
+      msg: 'Answers retrieved successfully!',
+      answers: answers
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
 app.post('/signup', async (req, res) => {
   console.log("GET /signup");
   try {
