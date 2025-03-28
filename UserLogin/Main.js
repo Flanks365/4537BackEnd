@@ -44,7 +44,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.post("/createsession", async (req, res) => {
+app.post("/api/v1/createsession", async (req, res) => {
   console.log("GET /createsession");
   try {
     const sessionres = await session.createSession(req, res);
@@ -61,7 +61,7 @@ app.post("/createsession", async (req, res) => {
   }
 });
 
-app.post('/joinsession', async (req, res) => {
+app.post('/api/v1/joinsession', async (req, res) => {
   console.log("GET /joinsession");
   try {
     const result = await sessionStudent.joinSession(req,res);
@@ -77,7 +77,7 @@ app.post('/joinsession', async (req, res) => {
   }
 });
 
-app.post('/retrivequestion', async (req, res) => {
+app.post('/api/v1/retrivequestion', async (req, res) => {
   console.log("GET /retrivequestion");
   try {
     const question = await sessionStudent.retrieveQuestion(req,res);
@@ -93,7 +93,7 @@ app.post('/retrivequestion', async (req, res) => {
   }
 });
 
-app.post('/recieveanswer', async (req, res) => {
+app.post('/api/v1/recieveanswer', async (req, res) => {
   console.log("GET /recieveanswer");
   try {
     const result = await sessionStudent.recieveAnswer(req,res);
@@ -112,7 +112,7 @@ app.post('/recieveanswer', async (req, res) => {
 
 
 
-app.post('/checksession', async (req, res) => {
+app.post('/api/v1/checksession', async (req, res) => {
   console.log("GET /checksession");
   try {
     const res = await session.checkSession(req, res);
@@ -129,7 +129,7 @@ app.post('/checksession', async (req, res) => {
 });
 
 
-app.post('/destroysession', async (req, res) => {
+app.post('/api/v1/destroysession', async (req, res) => {
   console.log("GET /destroysession");
   try {
     const result = await session.destroySession(req, res);
@@ -145,7 +145,7 @@ app.post('/destroysession', async (req, res) => {
   }
 });
 
-app.post('/confirmquestion', async (req, res) => {
+app.post('/api/v1/confirmquestion', async (req, res) => {
   console.log("GET /confirmquestion");
   try {
     const questionId = await session.recieveQuestions(req, res);
@@ -162,7 +162,7 @@ app.post('/confirmquestion', async (req, res) => {
 }
 );
 
-app.post('/endquestion', async (req, res) => {
+app.post('/api/v1/endquestion', async (req, res) => {
   console.log("GET /endquestion");
   try {
     await session.endQuestion(req, res);
@@ -177,7 +177,7 @@ app.post('/endquestion', async (req, res) => {
   }
 });
 
-app.post('/getanswers', async (req, res) => {
+app.post('/api/v1/getanswers', async (req, res) => {
   console.log("GET /getanswers");
   try {
     const answers = await session.retrieveAnswers(req, res);
@@ -193,7 +193,7 @@ app.post('/getanswers', async (req, res) => {
   }
 });
 
-app.post('/signup', async (req, res) => {
+app.post('/api/v1/signup', async (req, res) => {
   console.log("GET /signup");
   try {
     login.routeRequest(req, res);
@@ -205,7 +205,7 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/api/v1/login', async (req, res) => {
   console.log("GET /login");
   try {
     login.routeRequest(req, res);
@@ -217,7 +217,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/logout', async (req, res) => {
+app.post('/api/v1/logout', async (req, res) => {
   console.log("GET /logout");
   try {
     login.routeRequest(req, res);
@@ -229,7 +229,7 @@ app.post('/logout', async (req, res) => {
   }
 });
 
-app.post('/checktoken', async (req, res) => {
+app.post('/api/v1/checktoken', async (req, res) => {
   console.log("GET /checkToken");
   try {
     login.routeRequest(req, res);

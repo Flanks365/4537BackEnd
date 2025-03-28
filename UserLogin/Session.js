@@ -199,8 +199,7 @@ class SessionStudentUtils{
         const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
         const sessionResult = await db.selectQuery(sessionQuery);
         if (sessionResult.length === 0) {
-            console.error('Session not found');
-            throw new Error('Session not found');
+            return [];
         }
         const sessionId = sessionResult[0].id;
         console.log(`Session found with ID: ${sessionId}`);
@@ -220,8 +219,7 @@ class SessionStudentUtils{
         const result = await db.selectQuery(selectQuery);
 
         if (result.length === 0) {
-            console.error('No active question found');
-            throw new Error('No active question found');
+            return [];
         }
 
         console.log(`Active question found: ${result[0].text}`);
