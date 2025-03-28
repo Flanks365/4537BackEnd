@@ -162,6 +162,58 @@ class SessionTeacherUtils{
 }
 
 class SessionStudentUtils{
+
+    //join
+    static async joinSession(req,res){
+        const {session_code, userId} = req.body;
+
+        console.log(`Joining session with code: ${session_code} for user ID: ${userId}`);
+        const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
+        const sessionResult = await db.selectQuery(sessionQuery);
+        if (sessionResult.length === 0) {
+            console.error('Session not found');
+            throw new Error('Session not found');
+        }
+        const sessionId = sessionResult[0].id;
+        console.log(`Session found with ID: ${sessionId}`);
+        const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
+        await db.insertQuery(userSessionQuery);
+        console.log(`User ID ${userId} joined session ID ${sessionId}`);
+        return {sessionId: sessionId};
+    }
+
+
+    //retrive question
+    static async retrieveQuestion(req,res){
+        console.log('Retrieving active question...');
+        const { sessionId } = req.body;
+
+        const selectQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+        const result = await db.selectQuery(selectQuery);
+
+        if (result.length === 0) {
+            console.error('No active question found');
+            throw new Error('No active question found');
+        }
+
+        console.log(`Active question found: ${result[0].text}`);
+        return result[0];
+    }
+
+
+    //recieve answer
+    static async recieveAnswer(req,res){
+        console.log('Receiving answer...');
+        const {userId,questionId, answer} = req.body;
+
+        // here do correctness logic / api call to ai
+
+        console.log(`Inserting answer: ${answer}`);
+        const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ( '${answer}', 0.5, '${questionId}', '${userId}')`;
+        await db.insertQuery(insertQuery);
+
+        return correct_val;
+    }
 }
 
 module.exports = {
