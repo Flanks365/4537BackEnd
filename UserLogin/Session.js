@@ -182,7 +182,7 @@ class SessionTeacherUtils{
         const result = await db.selectQuery(selectQuery);
 
         if (result.length === 0) {
-            return { name: "No answers found" };
+            return {};
         }
 
         console.log(`Retrieved ${result.length} answers.`);
