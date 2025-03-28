@@ -2,7 +2,6 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const Database = require('./database');
-const { Session } = require('express-session');
 const db = new Database();
 
 class SessionTeacherUtils{
