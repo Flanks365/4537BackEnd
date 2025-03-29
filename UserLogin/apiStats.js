@@ -9,7 +9,7 @@ const db = new Database();
 
 class apiStatsUtils {
 
-    static async getUsage(req, res) {
+    static async getUsage() {
         // let selectQuery = `select * from ApiTracking;`;
         let selectQuery = `describe ApiTracking;`
         let result = await db.selectQuery(selectQuery);

@@ -275,8 +275,9 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
   }
 });
 
-app.post('/api/v1/apiStats', async (req, res) => {
+app.get('/api/v1/apiStats', async (req, res) => {
   console.log("GET /apiStats");
+  res.json(req)
   try {
     const result = await apiStatsUtils.getUsage(req, res)
     res.json(result)
