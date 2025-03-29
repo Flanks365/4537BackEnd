@@ -36,13 +36,14 @@ class aiUtils{
                 'Content-Type': 'application/json'
             }
 
-            const answerText = `Question: ${req.body.question}\nAnswer: ${req.body.answer}`
+            const answerText = `The following answer correctly and completely answers the question.\nQuestion: ${req.body.question}\nAnswer: ${req.body.answer}`
             const body = {
                 text: answerText
             }
 
             const response = await axios.post(API_URL + 'gradeanswer', body, {headers: headers});
     
+            return req.body
             return response.data; // {label, score}
         } catch (error) {
             console.error('Error:', error);
