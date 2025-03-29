@@ -43,7 +43,6 @@ class aiUtils{
 
             const response = await axios.post(API_URL + 'gradeanswer', body, {headers: headers});
     
-            return {text: answerText}
             return response.data; // {label, score}
         } catch (error) {
             console.error('Error:', error);
