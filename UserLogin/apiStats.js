@@ -11,7 +11,8 @@ class apiStatsUtils {
 
     static async getUsage() {
         // let selectQuery = `select * from ApiTracking;`;
-        let selectQuery = `describe ApiTracking;`
+        // let selectQuery = `describe ApiTracking;`
+        let selectQuery = `select * from users;`
         let result = await db.selectQuery(selectQuery);
 
         return result
