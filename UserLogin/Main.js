@@ -277,7 +277,7 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
 
 app.get('/api/v1/apiStats', async (req, res) => {
   console.log("GET /apiStats");
-  // apiStatsUtils.incrementUsage()
+  apiStatsUtils.incrementUsage(27, '/api/v1/apiStats', 'GET')
   try {
     const result = await apiStatsUtils.getUsage(req, res)
     res.json(result)

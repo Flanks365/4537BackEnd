@@ -10,20 +10,20 @@ const db = new Database();
 class apiStatsUtils {
 
     static async getUsage() {
-        // let selectQuery = `select * from ApiTracking;`;
-        let selectQuery = `describe ApiTracking;`
+        let selectQuery = `select * from ApiTracking;`;
+        // let selectQuery = `describe ApiTracking;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 
         return result
     }
 
-    static async incrementUsage(userId, endpoint) {
+    static async incrementUsage(userId, endpoint, method) {
         let selectQuery = `select * from ApiTracking where user_id = ${userId} and api_endpoint = ${endpoint};`
         let result = await db.selectQuery(selectQuery)
 
         if (!result || result.length <= 0) {
-            const insertQuery = `insert into ApiTracking (user_id, api_endpoint, counter) values (${userId}, ${endpoint}, 1)`
+            const insertQuery = `insert into ApiTracking (user_id, api_endpoint, counter, method) values (${userId}, ${endpoint}, 1, ${method})`
             await db.insertQuery(insertQuery)
         } else {
             const usage = result[0]
