@@ -36,7 +36,7 @@ app.get('/', async (req, res) => {
   try {
     const results = await db.selectQuery('SELECT * FROM users');
     res.json({
-      message: 'Database connection and query successful!',
+      message: 'Database connection and query successful',
       data: results
     });
   } catch (err) {
