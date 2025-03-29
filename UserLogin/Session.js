@@ -238,8 +238,13 @@ class SessionStudentUtils{
         const {token,questionId, answer} = req.body;
 
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
-        // here do correctness logic / api call to ai
-        let correct_val = 0.5;
+
+        const grade = await axios.post(
+            'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
+            {question: req.body.question, answer: req.body.answer}
+        );
+        const correct_val = await grade.data.score
+        // let correct_val = 0.5;
 
         console.log(`Inserting answer: ${answer}`);
         const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ( '${answer}', 0.5, '${questionId}', '${userId}')`;
