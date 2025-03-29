@@ -12,7 +12,7 @@ class apiStatsUtils {
     static async getUsage() {
         // let selectQuery = `select * from ApiTracking;`;
         // let selectQuery = `describe ApiTracking;`
-        let selectQuery = `select * from users;`
+        let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 
         return result
