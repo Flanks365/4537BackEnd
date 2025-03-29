@@ -1,15 +1,18 @@
 const express = require('express');
+const multer = require('multer');
 const http = require('http');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 const Database = require('./database');
 const LoginUtils = require('./Login');
 const { SessionTeacherUtils, SessionStudentUtils } = require('./Session');
+const aiUtils = require('./aiServices')
 const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 8080;
+const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
 
@@ -233,6 +236,36 @@ app.post('/api/v1/checktoken', async (req, res) => {
   console.log("GET /checkToken");
   try {
     login.routeRequest(req, res);
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
+  console.log("POST /transcribeQuestion");
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  try {
+    const questionText = await aiUtils.transcribeQuestion(req, res)
+    res.json(questionText)
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.post('/api/v1/gradeAnswer', async (req, res) => {
+  console.log("POST /gradeAnswer");
+  try {
+    const gradedAnswer = await aiUtils.gradeAnswer(req, res)
+    res.json(gradedAnswer)
   } catch (err) {
     res.status(500).json({
       msg: 'Error connecting to the database or executing query',
