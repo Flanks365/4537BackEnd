@@ -36,7 +36,7 @@ class aiUtils{
                 'Content-Type': 'application/json'
             }
 
-            const answerText = `The following answer correctly and completely answers the question.\nQuestion: ${req.body.question}\nAnswer: ${req.body.answer}`
+            const answerText = `The following answer is relevant, and correctly and completely answers the question.\nQuestion: ${req.body.question}\nAnswer: ${req.body.answer}`
             const body = {
                 text: answerText
             }

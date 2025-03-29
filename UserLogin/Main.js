@@ -7,6 +7,7 @@ const Database = require('./database');
 const LoginUtils = require('./Login');
 const { SessionTeacherUtils, SessionStudentUtils } = require('./Session');
 const aiUtils = require('./aiServices')
+const apiStatsUtils = require('./apiStats')
 const cors = require('cors');
 
 const app = express();
@@ -266,6 +267,19 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
   try {
     const gradedAnswer = await aiUtils.gradeAnswer(req, res)
     res.json(gradedAnswer)
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.post('/api/v1/apiStats', async (req, res) => {
+  console.log("GET /apiStats");
+  try {
+    const result = await apiStatsUtils.getUsage(req, res)
+    res.json(result)
   } catch (err) {
     res.status(500).json({
       msg: 'Error connecting to the database or executing query',
