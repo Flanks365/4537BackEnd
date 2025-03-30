@@ -298,6 +298,22 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
   }
 });
 
+app.get('/api/v1/apiEndpointUsage', async (req, res) => {
+  try {
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiEndpointUsage', 'GET');
+    const result = await apiStatsUtils.endpointUsage();
+    res.json({
+      message: messages.api.endpointUsage,
+      data: result
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
+  }
+});
+
 app.get('/api/v1/apiUserUsage', async (req, res) => {
   try {
     const result = await apiStatsUtils.userUsage();

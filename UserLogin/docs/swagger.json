@@ -228,7 +228,7 @@
       }
     },
     "/api/v1/destroysession": {
-      "post": {
+      "put": {
         "description": "End the given session.",
         "tags": ["Quiz Session"],
         "requestBody": {
@@ -452,7 +452,7 @@
       }
     },
     "/api/v1/logout": {
-      "post": {
+      "delete": {
         "description": "Logs the user out of the app (removes their token from the active session database).",
         "tags": ["Authentication"],
         "requestBody": {
