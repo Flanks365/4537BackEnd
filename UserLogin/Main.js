@@ -143,7 +143,7 @@ app.post('/api/v1/checksession', async (req, res) => {
   }
 });
 
-app.post('/api/v1/destroysession', async (req, res) => {
+app.put('/api/v1/destroysession', async (req, res) => {
   try {
     const result = await session.destroySession(req, res);
     res.json({
@@ -224,7 +224,7 @@ app.post('/api/v1/login', async (req, res) => {
   }
 });
 
-app.post('/api/v1/logout', async (req, res) => {
+app.delete('/api/v1/logout', async (req, res) => {
   try {
     await login.routeRequest(req, res);
   } catch (err) {
@@ -246,6 +246,7 @@ app.post('/api/v1/checktoken', async (req, res) => {
   }
 });
 
+// ChatGPT used for file uploading syntax
 app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: messages.auth.noFile });
@@ -257,21 +258,6 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
     const questionText = await aiUtils.transcribeQuestion(req, res);
     await aiUtils.decrementUsage(userId);
     res.json(questionText);
-  } catch (err) {
-    res.status(500).json({
-      msg: messages.auth.serverError,
-      error: err.message
-    });
-  }
-});
-
-app.post('/api/v1/gradeAnswer', async (req, res) => {
-  try {
-    const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
-    await apiStatsUtils.incrementUsage(userId, '/api/v1/gradeAnswer', 'POST');
-    const gradedAnswer = await aiUtils.gradeAnswer(req.body.question, req.body.answer);
-    await aiUtils.decrementUsage(req.body.userId);
-    res.json(gradedAnswer);
   } catch (err) {
     res.status(500).json({
       msg: messages.auth.serverError,

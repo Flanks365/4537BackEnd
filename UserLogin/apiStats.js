@@ -1,21 +1,14 @@
-// const mysql = require('mysql2/promise');
 require('dotenv').config();
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcryptjs');
 const fs = require('fs')
 
-// const secretKey = process.env.JWT_SECRET_KEY;
 const Database = require('./database');
 const db = new Database();
 
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 
 class apiStatsUtils {
-
+    // ChatGPT used for refining mysql query
     static async endpointUsage() {
-        // let selectQuery = `select * from ApiTracking;`;
-        // let selectQuery = `describe ApiTracking;`
-        // let selectQuery = `show tables;`
         let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
                             from ApiTracking
                             group by api_endpoint, method;`;
@@ -24,12 +17,11 @@ class apiStatsUtils {
         return result
     }
 
+    // ChatGPT used for refining mysql query
     static async userUsage() {
         let selectQuery = `select u.id as user_id, u.name, u.email, sum(a.counter) as n_requests
                             from users u inner join ApiTracking a on u.id = a.user_id
                             group by u.id, u.name;`;
-        // let selectQuery = `select * from users;`
-        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 
         return result
@@ -49,8 +41,6 @@ class apiStatsUtils {
     }
 
     static async testDb(selectQuery) {
-        // let selectQuery = `select * from Session;`
-        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 
         return result

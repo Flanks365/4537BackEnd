@@ -401,6 +401,9 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -436,6 +439,9 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -467,6 +473,9 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -498,6 +507,9 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -531,55 +543,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/gradeAnswer": {
-      "post": {
-        "description": "Uses AI to grade how correct the given answer is to the given question.",
-        "tags": ["AI Services"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "token": {
-                    "type": "string",
-                    "description": "User JWT"
-                  },
-                  "sessionId": {
-                    "type": "string",
-                    "description": "Id of the session for which question will be ended"
-                  }
-                },
-                "required": ["token", "sessionId"]
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -642,19 +605,6 @@
           }
         }
       },
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/v1/testdb": {
       "get": {
         "description": "",
         "responses": {
