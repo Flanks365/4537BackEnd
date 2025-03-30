@@ -2,6 +2,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const apiStatsUtils = require('./apiStats')
 
 const secretKey = process.env.JWT_SECRET_KEY;
 const Database = require('./database');
