@@ -33,6 +33,10 @@ class apiStatsUtils {
     }
 
     static async incrementUsage(userId, endpoint, method) {
+        if (typeof userId !== 'string') {
+            throw new Error('Invalid user ID.')
+        }
+
         let selectQuery = `select * from ApiTracking where user_id = ${userId} and api_endpoint = '${endpoint}';`
         let result = await db.selectQuery(selectQuery)
 

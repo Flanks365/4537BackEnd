@@ -280,7 +280,7 @@ app.post('/api/v1/apiEndpointUsage', async (req, res) => {
   console.log("GET /apiEndpointUsage");
   try {
     await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiEndpointUsage', 'GET')
-    const result = await apiStatsUtils.endpointUsage(req, res)
+    const result = await apiStatsUtils.endpointUsage()
     res.json(result)
   } catch (err) {
     res.status(500).json({
@@ -294,7 +294,7 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
   console.log("GET /apiUserUsage");
   try {
     await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
-    const result = await apiStatsUtils.userUsage(req, res)
+    const result = await apiStatsUtils.userUsage()
     res.json(result)
   } catch (err) {
     res.status(500).json({

@@ -62,7 +62,7 @@ class aiUtils{
             throw new Error('User could not be found.')
         } else {
             const user = result[0]
-            const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where user_id = ${userId};`
+            const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where id = ${userId};`
             await db.updateQuery(updateQuery)
         }
     }
