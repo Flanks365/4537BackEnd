@@ -153,11 +153,7 @@ class SessionTeacherUtils {
         
 
         } catch (err) {
-            return {
-                success: false,
-                message: messages.errors.questionCreationError,
-                error: err.message
-            };
+            return new Error(messages.errors.questionCreationError);
         }
     }
 
