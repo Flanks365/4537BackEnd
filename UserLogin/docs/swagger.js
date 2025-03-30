@@ -35,10 +35,6 @@ const options = {
     ],
     securityDefinitions: {},
     definitions: {
-      todoResponse: {
-        code: 200,
-        message: "Success",
-      },
       "errorResponse.400": {
         code: 400,
         message:

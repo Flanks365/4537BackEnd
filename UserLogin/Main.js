@@ -12,6 +12,7 @@ const cors = require('cors');
 const fs = require('fs')
 
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
+// const messages = JSON.parse(fs.readFileSync('./UserLogin/lang/en/messages.json'));
 
 const app = express();
 const server = http.createServer(app);
@@ -259,7 +260,7 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
   }
 
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
     const questionText = await aiUtils.transcribeQuestion(req, res)
     await aiUtils.decrementUsage(req.body.userId)
     res.json(questionText)

@@ -1,5 +1,5 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.3",
   "info": {
     "version": "1.0.0",
     "title": "AI Quiz App API",
@@ -13,12 +13,20 @@
   "basePath": "/",
   "tags": [
     {
-      "name": "AI QUIZ CRUD",
-      "description": "AI Quiz related API"
+      "name": "Authentication",
+      "description": "Login and authentication API"
     },
     {
-      "name": "AI Quiz",
-      "description": "AI Quiz App"
+      "name": "Quiz Session",
+      "description": "API for managing quiz sessions/rooms where teachers can show questions and students can answer them"
+    },
+    {
+      "name": "AI Services",
+      "description": "API for accessing AI services for transcribing question audio and grading answer correctness"
+    },
+    {
+      "name": "API Usage",
+      "description": "API for accessing statistics on API usage"
     }
   ],
   "schemes": [
@@ -48,6 +56,7 @@
     "/api/v1/createsession": {
       "post": {
         "description": "",
+        "tags": ["Quiz Session"],
         "responses": {
           "200": {
             "description": "OK"
@@ -61,6 +70,7 @@
     "/api/v1/joinsession": {
       "post": {
         "description": "",
+        "tags": ["Quiz Session"],
         "responses": {
           "200": {
             "description": "OK"
@@ -100,6 +110,7 @@
     "/api/v1/checksession": {
       "post": {
         "description": "",
+        "tags": ["Quiz Session"],
         "responses": {
           "200": {
             "description": "OK"
@@ -113,6 +124,7 @@
     "/api/v1/destroysession": {
       "post": {
         "description": "",
+        "tags": ["Quiz Session"],
         "responses": {
           "200": {
             "description": "OK"
@@ -164,7 +176,33 @@
     },
     "/api/v1/signup": {
       "post": {
-        "description": "",
+        "description": "Create an account for the specified user.",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of new user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the new user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the new user"
+                  }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
         "responses": {
           "404": {
             "description": "Not Found"
@@ -177,7 +215,28 @@
     },
     "/api/v1/login": {
       "post": {
-        "description": "",
+        "description": "Log the user into the app (creates a JWT for the user).",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body",
+            "description": "User email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "User password",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "404": {
             "description": "Not Found"
@@ -190,7 +249,19 @@
     },
     "/api/v1/logout": {
       "post": {
-        "description": "",
+        "description": "Logs the user out of the app (removes their token from the active session database).",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "body",
+            "description": "User JWT",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "404": {
             "description": "Not Found"
@@ -203,7 +274,17 @@
     },
     "/api/v1/checktoken": {
       "post": {
-        "description": "",
+        "description": "Check validity of a user JWT.",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "body",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "404": {
             "description": "Not Found"
@@ -217,6 +298,7 @@
     "/api/v1/transcribeQuestion": {
       "post": {
         "description": "",
+        "tags": ["AI Services"],
         "parameters": [
           {
             "name": "body",
@@ -247,6 +329,7 @@
     "/api/v1/gradeAnswer": {
       "post": {
         "description": "",
+        "tags": ["AI Services"],
         "parameters": [
           {
             "name": "body",
@@ -274,6 +357,7 @@
     "/api/v1/apiEndpointUsage": {
       "post": {
         "description": "",
+        "tags": ["API Usage"],
         "parameters": [
           {
             "name": "body",
@@ -301,6 +385,7 @@
     "/api/v1/apiUserUsage": {
       "post": {
         "description": "",
+        "tags": ["API Usage"],
         "parameters": [
           {
             "name": "body",
@@ -351,19 +436,6 @@
     }
   },
   "definitions": {
-    "todoResponse": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "number",
-          "example": 200
-        },
-        "message": {
-          "type": "string",
-          "example": "Success"
-        }
-      }
-    },
     "errorResponse.400": {
       "type": "object",
       "properties": {
