@@ -27,7 +27,7 @@ class apiStatsUtils {
         return result
     }
 
-    static async aiUsage(userId) {
+    static async singleUserUsage(userId) {
         let selectQuery = `select api_usage from users where id=${userId};`;
         let result = await db.selectQuery(selectQuery);
 
@@ -46,7 +46,7 @@ class apiStatsUtils {
         return result
     }
 
-    static async incrementUsage(userId, endpoint, method) {
+    static async incrementUsage(userId, endpoint, method, decrement = true) {
         if (typeof userId !== 'number' && typeof userId !== 'string') {
             throw new Error(messages.apiInvalidUser)
         }
@@ -60,6 +60,27 @@ class apiStatsUtils {
         } else {
             const usage = result[0]
             const updateQuery = `update ApiTracking set counter = ${usage.counter + 1} where user_id = ${userId} and api_endpoint = '${endpoint}';`
+            await db.updateQuery(updateQuery)
+        }
+
+        if (decrement) {
+            this.decrementUsage(userId)
+        }
+    }
+
+    static async decrementUsage(userId) {
+        if (typeof userId !== 'number' && typeof userId !== 'string') {
+            throw new Error(messages.apiInvalidUser)
+        }
+
+        let selectQuery = `select * from users where id = ${userId};`
+        let result = await db.selectQuery(selectQuery)
+
+        if (!result || result.length <= 0) {
+            throw new Error(messages.userDataNotFound)
+        } else {
+            const user = result[0]
+            const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where id = ${userId};`
             await db.updateQuery(updateQuery)
         }
     }

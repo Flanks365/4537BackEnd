@@ -256,7 +256,6 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
     const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
     await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST');
     const questionText = await aiUtils.transcribeQuestion(req, res);
-    await aiUtils.decrementUsage(userId);
     res.json(questionText);
   } catch (err) {
     res.status(500).json({
@@ -332,13 +331,18 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
   }
 });
 
-app.get('/api/v1/apiAiUsage', async (req, res) => {
-  console.log("GET /apiAiUsage");
+app.get('/api/v1/apiSingleUserUsage', async (req, res) => {
+  console.log("GET /apiSingleUserUsage");
   try {
     const userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
-    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiAiUsage', 'GET')
-    const result = await apiStatsUtils.aiUsage(userId)
-    res.json(result)
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiSingleUserUsage', 'GET')
+    const result = await apiStatsUtils.singleUserUsage(userId)
+    // res.json(result)
+    res.json({
+      msg: messages.success.usageStatsRetrieved,
+      callsRemaining: result,
+      limitReached: result <= 0
+    })
   } catch (err) {
     res.status(500).json({
       msg: messages.serverOrDbError,

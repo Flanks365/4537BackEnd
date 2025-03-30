@@ -189,7 +189,7 @@ class SessionTeacherUtils {
         try {
             const {token, sessionId} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
-            await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveAnswers', 'POST');
+            await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveAnswers', 'POST', false);
 
             const questionQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
             const questionResult = await db.selectQuery(questionQuery);
@@ -264,7 +264,7 @@ class SessionStudentUtils {
         try {
             const { token, sessionId } = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
-            await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveQuestion', 'POST');
+            await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveQuestion', 'POST', false);
 
             const selectQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
             const result = await db.selectQuery(selectQuery);

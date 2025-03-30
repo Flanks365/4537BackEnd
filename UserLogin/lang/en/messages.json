@@ -46,7 +46,8 @@
     "noActiveQuestion": "No active question found",
     "sessionJoined": "Successfully joined session",
     "questionRetrieved": "Question retrieved successfully",
-    "answerReceived": "Answer received successfully"
+    "answerReceived": "Answer received successfully",
+    "usageStatsRetrieved": "API usage retireve successfully"
   },
   "errors": {
     "invalidCredentials": "Invalid email or password",

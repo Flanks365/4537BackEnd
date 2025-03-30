@@ -49,7 +49,7 @@ const options = {
         message: "You do not have permission to access this resource.",
       },
       "errorResponse.404": {
-        code: "404",
+        code: 404,
         message: "The requested resource could not be found on the server.",
       },
       "errorResponse.500": {

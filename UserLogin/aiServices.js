@@ -60,23 +60,6 @@ class aiUtils{
             throw new Error(messages.gradingFailed)
         }
     }
-
-    static async decrementUsage(userId) {
-        if (typeof userId !== 'number' && typeof userId !== 'string') {
-            throw new Error(messages.apiInvalidUser)
-        }
-
-        let selectQuery = `select * from users where id = ${userId};`
-        let result = await db.selectQuery(selectQuery)
-
-        if (!result || result.length <= 0) {
-            throw new Error(messages.userDataNotFound)
-        } else {
-            const user = result[0]
-            const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where id = ${userId};`
-            await db.updateQuery(updateQuery)
-        }
-    }
 }
 
 module.exports = aiUtils
