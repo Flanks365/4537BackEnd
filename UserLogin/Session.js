@@ -60,6 +60,7 @@ class SessionTeacherUtils{
         }
 
         const userId = userResult[0].user_id;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/createSession', 'POST')
         console.log(`User ID ${userId} associated with the session.`);
 
         const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
@@ -70,7 +71,10 @@ class SessionTeacherUtils{
 
     static async checkSession(req, res) {
         console.log('Checking session...');
-        const { sessionCode } = req.body;
+        const { token, sessionCode } = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/checkSession', 'POST')
+
         const selectQuery = `SELECT * FROM Session WHERE session_code = '${sessionCode}'`;
         const result = await db.selectQuery(selectQuery);
 
@@ -84,6 +88,9 @@ class SessionTeacherUtils{
     }
 
     static async destroySession(req, res) {
+        const {token} = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/destroySession', 'POST')
         try {
             // Validate request body
             if (!req.body || !req.body.sessionId) {
@@ -124,7 +131,10 @@ class SessionTeacherUtils{
 
     static async recieveQuestions(req,res){
         console.log('Receiving new question...');
-        const { sessionId, question } = req.body;
+        const { token, sessionId, question } = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/receiveQuestions', 'POST')
+
         await this.endQuestion(req, res);
         console.log(`Inserting new question into session ${sessionId}`);
 
@@ -146,7 +156,9 @@ class SessionTeacherUtils{
 
     static async endQuestion(req,res){
         console.log('Ending active question...');
-        const { sessionId } = req.body;
+        const { token, sessionId } = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/endQuestion', 'POST')
 
         const checkQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
         const checkResult = await db.selectQuery(checkQuery);
@@ -162,7 +174,10 @@ class SessionTeacherUtils{
 
     static async retrieveAnswers(req,res){
         console.log('Retrieving answers for active question...');
-        const sessionId = req.body.sessionId;
+
+        const {token, sessionId} = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveAnswers', 'POST')
 
         const questionQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
         const questionResult = await db.selectQuery(questionQuery);
@@ -199,6 +214,7 @@ class SessionStudentUtils{
         const {session_code, token} = req.body;
 
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/joinSession', 'POST')
 
         console.log(`Joining session with code: ${session_code} for user ID: ${userId}`);
         const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
@@ -218,7 +234,9 @@ class SessionStudentUtils{
     //retrive question
     static async retrieveQuestion(req,res){
         console.log('Retrieving active question...');
-        const { sessionId } = req.body;
+        const { token, sessionId } = req.body;
+        const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveQuestion', 'POST')
 
         const selectQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
         const result = await db.selectQuery(selectQuery);
@@ -235,9 +253,10 @@ class SessionStudentUtils{
     //recieve answer
     static async recieveAnswer(req,res){
         console.log('Receiving answer...');
-        const {token,questionId, answer} = req.body;
 
+        const {token,questionId, answer} = req.body;
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+        await apiStatsUtils.incrementUsage(userId, '/api/v1/receiveAnswer', 'POST')
 
         const grade = await axios.post(
             'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
@@ -247,7 +266,7 @@ class SessionStudentUtils{
         // let correct_val = 0.5;
 
         console.log(`Inserting answer: ${answer}`);
-        const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ( '${answer}', 0.5, '${questionId}', '${userId}')`;
+        const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ( '${answer}', ${correct_val}, '${questionId}', '${userId}')`;
         await db.insertQuery(insertQuery);
 
         return correct_val;
