@@ -260,9 +260,11 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
   }
 
   try {
+    const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
     // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
     const questionText = await aiUtils.transcribeQuestion(req, res)
-    await aiUtils.decrementUsage(req.body.userId)
+    await aiUtils.decrementUsage(userId)
     res.json(questionText)
   } catch (err) {
     res.status(500).json({

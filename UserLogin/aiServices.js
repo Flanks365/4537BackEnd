@@ -15,8 +15,8 @@ const API_KEY = process.env.AI_API_KEY;
 class aiUtils{
     static async transcribeQuestion(req, res) {
         try {
-            const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
-            await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
+            // const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
+            // await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
 
             const audioFilePath = req.file.path;
             const file = fs.createReadStream(audioFilePath)
