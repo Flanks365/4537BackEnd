@@ -238,6 +238,7 @@ class SessionStudentUtils {
             const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
             const sessionResult = await db.selectQuery(sessionQuery);
 
+            console.log("session_code: ", session_code, " results: ", JSON.stringify(sessionResult))
             if (!sessionResult || sessionResult.length <= 0) {
                 throw new Error(messages.errors.sessionJoinError)
                 // return {
