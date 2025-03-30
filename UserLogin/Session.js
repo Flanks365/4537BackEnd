@@ -25,19 +25,19 @@ class SessionTeacherUtils {
     static async createSession(req, res) {
         try {
             let randomCode = this.prototype.generateRandomCode();
-            let selectQuery = 'SELECT * FROM Session WHERE session_code = ?';
-            let result = await db.selectQuery(selectQuery, [randomCode]);
+            let selectQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
+            let result = await db.selectQuery(selectQuery);
 
             while(result.length > 0) {
                 randomCode = this.prototype.generateRandomCode();
-                result = await db.selectQuery(selectQuery, [randomCode]);
+                result = await db.selectQuery(`SELECT * FROM Session WHERE session_code = '${randomCode}'`);
             }
 
-            const insertQuery = 'INSERT INTO Session (session_code, is_active) VALUES (?, true)';
-            await db.insertQuery(insertQuery, [randomCode]);
+            const insertQuery = `INSERT INTO Session (session_code, is_active) VALUES ('${randomCode}', true)`;
+            await db.insertQuery(insertQuery);
 
-            const sessionQuery = 'SELECT * FROM Session WHERE session_code = ?';
-            const sessionResult = await db.selectQuery(sessionQuery, [randomCode]);
+            const sessionQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
+            const sessionResult = await db.selectQuery(sessionQuery);
 
             if (sessionResult.length === 0) {
                 throw new Error(messages.errors.sessionCreationFailed);
@@ -45,8 +45,8 @@ class SessionTeacherUtils {
 
             const sessionId = sessionResult[0].id;
             const userToken = req.body.token; 
-            const userSelectQuery = 'SELECT * FROM validTokens WHERE token = ?';
-            const userResult = await db.selectQuery(userSelectQuery, [userToken]);
+            const userSelectQuery = `SELECT * FROM validTokens WHERE token = '${userToken}'`;
+            const userResult = await db.selectQuery(userSelectQuery);
 
             if (userResult.length === 0) {
                 throw new Error(messages.errors.userNotFound);
@@ -55,8 +55,8 @@ class SessionTeacherUtils {
             const userId = userResult[0].user_id;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/createSession', 'POST');
 
-            const userSessionQuery = 'INSERT INTO UserSession (user_id, session_id) VALUES (?, ?)';
-            await db.insertQuery(userSessionQuery, [userId, sessionId]);
+            const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
+            await db.insertQuery(userSessionQuery);
 
             return {
                 code: randomCode, 
@@ -79,8 +79,8 @@ class SessionTeacherUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/checkSession', 'POST');
 
-            const selectQuery = 'SELECT * FROM Session WHERE session_code = ?';
-            const result = await db.selectQuery(selectQuery, [sessionCode]);
+            const selectQuery = `SELECT * FROM Session WHERE session_code = '${sessionCode}'`;
+            const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
                 return res.status(404).json({
@@ -115,8 +115,8 @@ class SessionTeacherUtils {
             }
 
             const { sessionId } = req.body;
-            const updateQuery = 'UPDATE Session SET is_active = false WHERE id = ?';
-            const result = await db.insertQuery(updateQuery, [sessionId]);
+            const updateQuery = `UPDATE Session SET is_active = false WHERE id = '${sessionId}'`;
+            const result = await db.insertQuery(updateQuery);
             
             if (result.affectedRows === 0) {
                 return res.status(404).json({
@@ -144,11 +144,11 @@ class SessionTeacherUtils {
 
             await this.endQuestion(req, res);
 
-            const insertQuery = 'INSERT INTO Question (session_id, text) VALUES (?, ?)';
-            await db.insertQuery(insertQuery, [sessionId, question]);
+            const insertQuery = `INSERT INTO Question (session_id, text) VALUES ('${sessionId}', '${question}')`;
+            await db.insertQuery(insertQuery);
 
-            const selectQuery = 'SELECT * FROM Question WHERE text = ? AND session_id = ?';
-            const result = await db.selectQuery(selectQuery, [question, sessionId]);
+            const selectQuery = `SELECT * FROM Question WHERE text = '${question}' AND session_id = '${sessionId}'`;
+            const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
                 throw new Error(messages.errors.questionCreationFailed);
@@ -173,12 +173,12 @@ class SessionTeacherUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/endQuestion', 'POST');
 
-            const checkQuery = 'SELECT * FROM Question WHERE session_id = ? AND curr_question = true';
-            const checkResult = await db.selectQuery(checkQuery, [sessionId]);
+            const checkQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+            const checkResult = await db.selectQuery(checkQuery);
 
             if (checkResult.length > 0) {
-                const updateQuery = 'UPDATE Question SET curr_question = false WHERE session_id = ? AND curr_question = true';
-                await db.insertQuery(updateQuery, [sessionId]);
+                const updateQuery = `UPDATE Question SET curr_question = false WHERE session_id = '${sessionId}' AND curr_question = true`;
+                await db.insertQuery(updateQuery);
             }
 
             return res.json({
@@ -199,8 +199,8 @@ class SessionTeacherUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveAnswers', 'POST');
 
-            const questionQuery = 'SELECT * FROM Question WHERE session_id = ? AND curr_question = true';
-            const questionResult = await db.selectQuery(questionQuery, [sessionId]);
+            const questionQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+            const questionResult = await db.selectQuery(questionQuery);
 
             if (questionResult.length === 0) {
                 return res.json({
@@ -214,10 +214,10 @@ class SessionTeacherUtils {
                 SELECT Answer.id, Answer.text, Answer.correctness, users.name 
                 FROM Answer
                 JOIN users ON Answer.user_id = users.id
-                WHERE Answer.question_id = ?
+                WHERE Answer.question_id = '${questionId}'
             `;
 
-            const result = await db.selectQuery(selectQuery, [questionId]);
+            const result = await db.selectQuery(selectQuery);
 
             return res.json({
                 message: messages.success.answersRetrieved,
@@ -240,8 +240,8 @@ class SessionStudentUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/joinSession', 'POST');
 
-            const sessionQuery = 'SELECT * FROM Session WHERE session_code = ?';
-            const sessionResult = await db.selectQuery(sessionQuery, [session_code]);
+            const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
+            const sessionResult = await db.selectQuery(sessionQuery);
 
             if (sessionResult.length === 0) {
                 return res.status(404).json({
@@ -250,8 +250,8 @@ class SessionStudentUtils {
             }
 
             const sessionId = sessionResult[0].id;
-            const userSessionQuery = 'INSERT INTO UserSession (user_id, session_id) VALUES (?, ?)';
-            await db.insertQuery(userSessionQuery, [userId, sessionId]);
+            const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
+            await db.insertQuery(userSessionQuery);
 
             return res.json({
                 message: messages.success.sessionJoined,
@@ -272,8 +272,8 @@ class SessionStudentUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/retrieveQuestion', 'POST');
 
-            const selectQuery = 'SELECT * FROM Question WHERE session_id = ? AND curr_question = true';
-            const result = await db.selectQuery(selectQuery, [sessionId]);
+            const selectQuery = `SELECT * FROM Question WHERE session_id = '${sessionId}' AND curr_question = true`;
+            const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
                 return res.json({
@@ -307,8 +307,8 @@ class SessionStudentUtils {
             }
 
             const correct_val = gradeObj.grade[0].score;
-            const insertQuery = 'INSERT INTO Answer (text, correctness, question_id, user_id) VALUES (?, ?, ?, ?)';
-            await db.insertQuery(insertQuery, [answer, correct_val, questionId, userId]);
+            const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ('${answer}', ${correct_val}, '${questionId}', '${userId}')`;
+            await db.insertQuery(insertQuery);
 
             return res.json({
                 message: messages.success.answerReceived,

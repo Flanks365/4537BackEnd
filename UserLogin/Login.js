@@ -22,9 +22,9 @@ async function checkLogin(req, res) {
     try {
         const { email, password } = req.body;
 
-        // Using parameterized query to prevent SQL injection
-        const query = 'SELECT id, name, role, password FROM users WHERE email = ?';
-        const result = await db.selectQuery(query, [email]);
+        // Using direct string interpolation
+        const query = `SELECT id, name, role, password FROM users WHERE email = '${email}'`;
+        const result = await db.selectQuery(query);
 
         if (result.length === 0) {
             return sendErrorResponse(res, 401, 'invalidCredentials');
@@ -38,7 +38,7 @@ async function checkLogin(req, res) {
         }
 
         // Delete any existing token for the user
-        await db.insertQuery('DELETE FROM validTokens WHERE user_id = ?', [user.id]);
+        await db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
 
         // Generate JWT
         const token = jwt.sign(
@@ -48,8 +48,7 @@ async function checkLogin(req, res) {
         );
 
         await db.insertQuery(
-            'INSERT INTO validTokens (user_id, token) VALUES (?, ?)',
-            [user.id, token]
+            `INSERT INTO validTokens (user_id, token) VALUES ('${user.id}', '${token}')`
         );
 
         res.json({
@@ -72,8 +71,8 @@ async function checkSignup(req, res) {
     try {
         const { name, email, password } = req.body;
 
-        const checkEmailQuery = 'SELECT id FROM users WHERE email = ?';
-        const result = await db.selectQuery(checkEmailQuery, [email]);
+        const checkEmailQuery = `SELECT id FROM users WHERE email = '${email}'`;
+        const result = await db.selectQuery(checkEmailQuery);
 
         if (result.length > 0) {
             return sendErrorResponse(res, 400, 'duplicateEmail');
@@ -82,13 +81,12 @@ async function checkSignup(req, res) {
         const hashedPassword = await bcrypt.hash(password, 10);
         const insertQuery = `
             INSERT INTO users (name, email, password, role) 
-            VALUES (?, ?, ?, 'student')
+            VALUES ('${name}', '${email}', '${hashedPassword}', 'student')
         `;
-        await db.insertQuery(insertQuery, [name, email, hashedPassword]);
+        await db.insertQuery(insertQuery);
 
         const userResult = await db.selectQuery(
-            'SELECT id, role FROM users WHERE email = ?',
-            [email]
+            `SELECT id, role FROM users WHERE email = '${email}'`
         );
 
         if (userResult.length === 0) {
@@ -105,8 +103,7 @@ async function checkSignup(req, res) {
         );
 
         await db.insertQuery(
-            'INSERT INTO validTokens (user_id, token) VALUES (?, ?)',
-            [userId, token]
+            `INSERT INTO validTokens (user_id, token) VALUES ('${userId}', '${token}')`
         );
 
         res.json({
@@ -135,8 +132,7 @@ async function checkToken(req, res) {
         const decoded = jwt.verify(token, secretKey, { algorithms: ['HS256'] });
 
         const tokenResult = await db.selectQuery(
-            'SELECT * FROM validTokens WHERE token = ?',
-            [token]
+            `SELECT * FROM validTokens WHERE token = '${token}'`
         );
 
         if (tokenResult.length === 0) {
@@ -144,8 +140,7 @@ async function checkToken(req, res) {
         }
 
         const userResult = await db.selectQuery(
-            'SELECT id, name, email, role FROM users WHERE id = ?',
-            [tokenResult[0].user_id]
+            `SELECT id, name, email, role FROM users WHERE id = '${tokenResult[0].user_id}'`
         );
 
         if (userResult.length === 0) {
@@ -169,7 +164,7 @@ async function logOut(req, res) {
     }
 
     try {
-        await db.deleteQuery('DELETE FROM validTokens WHERE token = ?', [token]);
+        await db.deleteQuery(`DELETE FROM validTokens WHERE token = '${token}'`);
         res.json({ msg: messages.success.logout });
     } catch (err) {
         sendErrorResponse(res, 500, 'logoutProcess', err);
