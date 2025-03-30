@@ -48,10 +48,14 @@ class aiUtils{
                 'Content-Type': 'application/json'
             }
 
+            console.log('grading answer: ' + answer + ' to question: ' + question)
+
             const answerText = `The following answer is relevant, and correctly and completely answers the question.\nQuestion: ${question}\nAnswer: ${answer}`
             const body = {
                 text: answerText
             }
+
+            console.log('grading prompt: ' + text)
 
             const response = await axios.post(API_URL + 'gradeanswer', body, {headers: headers});
     
