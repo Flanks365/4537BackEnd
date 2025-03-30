@@ -39,7 +39,7 @@ const session = SessionTeacherUtils
 const sessionStudent = SessionStudentUtils
 
 const swaggerUIPath= require("swagger-ui-express");
-const swaggerjsonFilePath = require("/docs/swagger.json");
+const swaggerjsonFilePath = require("./docs/swagger.json");
 app.use("/docs", swaggerUIPath.serve, swaggerUIPath.setup(swaggerjsonFilePath));
 
 
