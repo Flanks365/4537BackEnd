@@ -1,16 +1,18 @@
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const apiStatsUtils = require('./apiStats')
+// const apiStatsUtils = require('./apiStats')
 
 const Database = require('./database');
 const db = new Database();
 
-const secretKey = process.env.JWT_SECRET_KEY;
+// const secretKey = process.env.JWT_SECRET_KEY;
 const API_URL = process.env.AI_API_URL;
 const API_KEY = process.env.AI_API_KEY;
+
+const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 
 class aiUtils{
     static async transcribeQuestion(req, res) {
@@ -34,7 +36,7 @@ class aiUtils{
             return response.data; // {questionText}
         } catch (error) {
             console.error('Error:', error);
-            throw new Error('Failed to transcribe audio: ' + error)
+            throw new Error(messages.transcriptionFailed + error)
             // res.status(500).json({ error: 'Failed to transcribe audio' });
         }
     }
@@ -56,21 +58,21 @@ class aiUtils{
             return response.data; // {label, score}
         } catch (error) {
             console.error('Error:', error);
-            throw new Error('Failed to grade answer')
+            throw new Error(messages.gradingFailed)
             // res.status(500).json({ error: 'Failed to grade answer' });
         }
     }
 
     static async decrementUsage(userId) {
         if (typeof userId !== 'number' && typeof userId !== 'string') {
-            throw new Error('Invalid user ID.')
+            throw new Error(messages.apiInvalidUser)
         }
 
         let selectQuery = `select * from users where id = ${userId};`
         let result = await db.selectQuery(selectQuery)
 
         if (!result || result.length <= 0) {
-            throw new Error('User data could not be found.')
+            throw new Error(messages.userDataNotFound)
         } else {
             const user = result[0]
             const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where id = ${userId};`
