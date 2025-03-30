@@ -34,6 +34,10 @@ const login = LoginUtils;  // No instantiation needed if methods are static
 const session = SessionTeacherUtils
 const sessionStudent = SessionStudentUtils
 
+const swaggerUIPath= require("swagger-ui-express");
+const swaggerjsonFilePath = require("./docs/swagger.json");
+app.use("/docs", swaggerUIPath.serve, swaggerUIPath.setup(swaggerjsonFilePath));
+
 
 app.get('/', async (req, res) => {
   console.log("GET /");
