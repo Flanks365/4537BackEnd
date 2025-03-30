@@ -332,7 +332,10 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
 app.get('/api/v1/apiAiUsage', async (req, res) => {
   console.log("GET /apiAiUsage");
   try {
-    const userId = 27
+    let userId = 27
+    if (req.query.token) {
+      userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
+    }
     await apiStatsUtils.incrementUsage(userId, '/api/v1/apiAiUsage', 'GET')
     const result = await apiStatsUtils.aiUsage(userId)
     res.json(result)
