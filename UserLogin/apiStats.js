@@ -32,8 +32,8 @@ class apiStatsUtils {
         return result
     }
 
-    static async testDb() {
-        let selectQuery = `select * from Session;`
+    static async testDb(selectQuery) {
+        // let selectQuery = `select * from Session;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 

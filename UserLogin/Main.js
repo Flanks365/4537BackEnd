@@ -328,7 +328,7 @@ app.get('/api/v1/testdb', async (req, res) => {
   // console.log("GET /apiUserUsage");
   try {
     // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
-    const result = await apiStatsUtils.testDb()
+    const result = await apiStatsUtils.testDb(req.body.query)
     res.json(result)
   } catch (err) {
     res.status(500).json({
