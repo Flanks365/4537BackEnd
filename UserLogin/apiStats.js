@@ -32,6 +32,13 @@ class apiStatsUtils {
         return result
     }
 
+    static async aiUsage(userId) {
+        let selectQuery = `select api_usage from users where id=${userId};`;
+        let result = await db.selectQuery(selectQuery);
+
+        return result
+    }
+
     static async testDb(selectQuery) {
         // let selectQuery = `select * from Session;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`

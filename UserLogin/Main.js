@@ -334,6 +334,23 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
   }
 });
 
+app.get('/api/v1/apiAiUsage', async (req, res) => {
+  console.log("GET /apiAiUsage");
+  try {
+    // const {token} = req.body;
+    // const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+    const userId = 27
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiAiUsage', 'GET')
+    const result = await apiStatsUtils.aiUsage(userId)
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({
+      msg: messages.serverOrDbError,
+      error: err.message
+    });
+  }
+});
+
 app.get('/api/v1/testdb', async (req, res) => {
   // console.log("GET /apiUserUsage");
   try {
