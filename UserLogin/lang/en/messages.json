@@ -47,7 +47,7 @@
     "sessionJoined": "Successfully joined session",
     "questionRetrieved": "Question retrieved successfully",
     "answerReceived": "Answer received successfully",
-    "usageStatsRetrieved": "API usage retireve successfully"
+    "usageStatsRetrieved": "API usage retireved successfully"
   },
   "errors": {
     "invalidCredentials": "Invalid email or password",
@@ -65,6 +65,7 @@
     "sessionNotFound": "Session not found",
     "sessionCheckError": "Error checking session status",
     "missingSessionId": "Session ID is required",
+    "missingSessionCode": "Session code is required",
     "sessionEndError": "Error ending session",
     "questionCreationFailed": "Question creation failed",
     "questionCreationError": "Error creating question",

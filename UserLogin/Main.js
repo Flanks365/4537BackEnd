@@ -87,7 +87,7 @@ app.post('/api/v1/joinsession', async (req, res) => {
   try {
     const result = await sessionStudent.joinSession(req, res);
     res.json({
-      msg: messages.session.joined,
+      msg: messages.success.sessionJoined,
       sessionId: result.sessionId
     });
   } catch (err) {

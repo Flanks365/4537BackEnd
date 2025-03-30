@@ -231,14 +231,19 @@ class SessionStudentUtils {
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/joinSession', 'POST');
 
+            if (!session_code) {
+                throw new Error(messages.errors.missingSessionCode)
+            }
+
             const sessionQuery = `SELECT * FROM Session WHERE session_code = '${session_code}'`;
             const sessionResult = await db.selectQuery(sessionQuery);
 
-            if (sessionResult.length === 0) {
-                return {
-                    success: false,
-                    message: messages.errors.sessionNotFound
-                };
+            if (!sessionResult || sessionResult.length <= 0) {
+                throw new Error(messages.errors.sessionJoinError)
+                // return {
+                //     success: false,
+                //     message: messages.errors.sessionNotFound
+                // };
             }
 
             const sessionId = sessionResult[0].id;
