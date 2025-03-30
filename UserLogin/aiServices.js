@@ -55,11 +55,15 @@ class aiUtils{
     }
 
     static async decrementUsage(userId) {
-        let selectQuery = `select * from users where user_id = ${userId};`
+        if (typeof userId !== 'number' && typeof userId !== 'string') {
+            throw new Error('Invalid user ID.')
+        }
+
+        let selectQuery = `select * from users where id = ${userId};`
         let result = await db.selectQuery(selectQuery)
 
         if (!result || result.length <= 0) {
-            throw new Error('User could not be found.')
+            throw new Error('User data could not be found.')
         } else {
             const user = result[0]
             const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where id = ${userId};`
