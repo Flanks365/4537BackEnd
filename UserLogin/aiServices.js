@@ -30,7 +30,7 @@ class aiUtils{
             return response.data; // {questionText}
         } catch (error) {
             console.error('Error:', error);
-            throw new Error('Failed to transcribe audio')
+            throw new Error('Failed to transcribe audio: ' + error)
             // res.status(500).json({ error: 'Failed to transcribe audio' });
         }
     }
