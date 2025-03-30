@@ -15,7 +15,6 @@ const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET_KEY;
 
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
-// const messages = JSON.parse(fs.readFileSync('./UserLogin/lang/en/messages.json'));
 
 const app = express();
 const server = http.createServer(app);
@@ -24,18 +23,18 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
 
-const swaggerUIPath= require("swagger-ui-express");
+const swaggerUIPath = require("swagger-ui-express");
 const swaggerDocument = require("./docs/swagger.json");
 app.use("/docs", swaggerUIPath.serve);
 app.get("/docs", swaggerUIPath.setup(swaggerDocument));
 
 const corsOptions = {
   origin: [
-    'https://octopus-app-x9uen.ondigitalocean.app', // Your main app
-    'http://localhost:8080', // For local development
-    'https://cdn.jsdelivr.net' // For Swagger UI assets
+    'https://octopus-app-x9uen.ondigitalocean.app',
+    'http://localhost:8080',
+    'https://cdn.jsdelivr.net'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // All needed methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
     'Content-Type',
     'Authorization',
@@ -43,306 +42,244 @@ const corsOptions = {
     'Accept'
   ],
   credentials: true,
-  optionsSuccessStatus: 200 // For legacy browser support
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 
 const db = new Database();
-const login = LoginUtils;  // No instantiation needed if methods are static
-const session = SessionTeacherUtils
-const sessionStudent = SessionStudentUtils
+const login = LoginUtils;
+const session = SessionTeacherUtils;
+const sessionStudent = SessionStudentUtils;
 
-
+// Helper function for error responses
+const sendErrorResponse = (res, error) => {
+  res.status(500).json({
+    msg: messages.db.connectionError,
+    error: error.message
+  });
+};
 
 app.get('/', async (req, res) => {
-  console.log("GET /");
   try {
     const results = await db.selectQuery('SELECT * FROM users');
     res.json({
-      message: messages.dbQuerySuccess,
+      message: messages.db.querySuccess,
       data: results
     });
   } catch (err) {
-    res.status(500).json({
-      message: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post("/api/v1/createsession", async (req, res) => {
-  console.log("GET /createsession");
   try {
     const sessionres = await session.createSession(req, res);
     res.json({
-      msg: 'Session created successfully!',
+      msg: messages.session.created,
       sessionCode: (await sessionres).code,
       sessionId: (await sessionres).sessionId,
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/joinsession', async (req, res) => {
-  console.log("GET /joinsession");
   try {
-    const result = await sessionStudent.joinSession(req,res);
+    const result = await sessionStudent.joinSession(req, res);
     res.json({
-      msg: 'Session joined successfully!',
+      msg: messages.session.joined,
       sessionId: result.sessionId
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/retrivequestion', async (req, res) => {
-  console.log("GET /retrivequestion");
   try {
-    const question = await sessionStudent.retrieveQuestion(req,res);
+    const question = await sessionStudent.retrieveQuestion(req, res);
     res.json({
-      msg: 'Question retrieved successfully!',
+      msg: messages.session.questionRetrieved,
       question: question
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/recieveanswer', async (req, res) => {
-  console.log("GET /recieveanswer");
   try {
-    const result = await sessionStudent.recieveAnswer(req,res);
+    const result = await sessionStudent.recieveAnswer(req, res);
     res.json({
-      msg: 'Answer received successfully!',
+      msg: messages.session.answerReceived,
       result: result
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
-
-
-
 
 app.post('/api/v1/checksession', async (req, res) => {
-  console.log("GET /checksession");
   try {
-    const res = await session.checkSession(req, res);
+    const sessionStatus = await session.checkSession(req, res);
     res.json({
-      msg: 'Session checked successfully!',
-      is_active: res
+      msg: messages.session.checked,
+      is_active: sessionStatus
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
-
 app.post('/api/v1/destroysession', async (req, res) => {
-  console.log("GET /destroysession");
   try {
     const result = await session.destroySession(req, res);
     res.json({
-      msg: 'Session destroyed successfully!',
+      msg: messages.session.destroyed,
       is_active: result
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/confirmquestion', async (req, res) => {
-  console.log("GET /confirmquestion");
   try {
     const questionId = await session.recieveQuestions(req, res);
     res.json({
-      msg: 'Question confirmed successfully!',
+      msg: messages.session.questionConfirmed,
       questionId: questionId
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
-}
-);
+});
 
 app.post('/api/v1/endquestion', async (req, res) => {
-  console.log("GET /endquestion");
   try {
     await session.endQuestion(req, res);
     res.json({
-      msg: 'Question ended successfully!'
+      msg: messages.session.questionEnded
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/getanswers', async (req, res) => {
-  console.log("GET /getanswers");
   try {
     const answers = await session.retrieveAnswers(req, res);
     res.json({
-      msg: 'Answers retrieved successfully!',
+      msg: messages.session.answersRetrieved,
       answers: answers
     });
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/signup', async (req, res) => {
-  console.log("GET /signup");
   try {
-    login.routeRequest(req, res);
+    await login.routeRequest(req, res);
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/login', async (req, res) => {
-  console.log("GET /login");
   try {
-    login.routeRequest(req, res);
+    await login.routeRequest(req, res);
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/logout', async (req, res) => {
-  console.log("GET /logout");
   try {
-    login.routeRequest(req, res);
+    await login.routeRequest(req, res);
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/checktoken', async (req, res) => {
-  console.log("GET /checkToken");
   try {
-    login.routeRequest(req, res);
+    await login.routeRequest(req, res);
   } catch (err) {
-    res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
-      error: err.message
-    });
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
-  console.log("POST /transcribeQuestion");
   if (!req.file) {
-    return res.status(400).json({ error: messages.noFile });
+    return res.status(400).json({ error: messages.auth.noFile });
   }
 
   try {
     const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
-    await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
-    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
-    const questionText = await aiUtils.transcribeQuestion(req, res)
-    await aiUtils.decrementUsage(userId)
-    res.json(questionText)
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST');
+    const questionText = await aiUtils.transcribeQuestion(req, res);
+    await aiUtils.decrementUsage(userId);
+    res.json(questionText);
   } catch (err) {
     res.status(500).json({
-      msg: messages.serverOrDbError,
+      msg: messages.auth.serverError,
       error: err.message
     });
   }
 });
 
 app.post('/api/v1/gradeAnswer', async (req, res) => {
-  console.log("POST /gradeAnswer");
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/gradeAnswer', 'POST')
-    const gradedAnswer = await aiUtils.gradeAnswer(req, res)
-    await aiUtils.decrementUsage(req.body.userId)
-    res.json(gradedAnswer)
+    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/gradeAnswer', 'POST');
+    const gradedAnswer = await aiUtils.gradeAnswer(req, res);
+    await aiUtils.decrementUsage(req.body.userId);
+    res.json(gradedAnswer);
   } catch (err) {
     res.status(500).json({
-      msg: messages.serverOrDbError,
+      msg: messages.auth.serverError,
       error: err.message
     });
   }
 });
 
 app.post('/api/v1/apiEndpointUsage', async (req, res) => {
-  console.log("GET /apiEndpointUsage");
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiEndpointUsage', 'GET')
-    const result = await apiStatsUtils.endpointUsage()
-    res.json(result)
-  } catch (err) {
-    res.status(500).json({
-      msg: messages.serverOrDbError,
-      error: err.message
+    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiEndpointUsage', 'GET');
+    const result = await apiStatsUtils.endpointUsage();
+    res.json({
+      message: messages.api.endpointUsage,
+      data: result
     });
+  } catch (err) {
+    sendErrorResponse(res, err);
   }
 });
 
 app.post('/api/v1/apiUserUsage', async (req, res) => {
-  console.log("GET /apiUserUsage");
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
-    const result = await apiStatsUtils.userUsage()
-    res.json(result)
-  } catch (err) {
-    res.status(500).json({
-      msg: messages.serverOrDbError,
-      error: err.message
+    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET');
+    const result = await apiStatsUtils.userUsage();
+    res.json({
+      message: messages.api.userUsage,
+      data: result
     });
+  } catch (err) {
+    sendErrorResponse(res, err);
   }
 });
 
 app.get('/api/v1/apiUserUsage', async (req, res) => {
-  console.log("GET /apiUserUsage");
   try {
-    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
-    const result = await apiStatsUtils.userUsage()
-    res.json(result)
-  } catch (err) {
-    res.status(500).json({
-      msg: messages.serverOrDbError,
-      error: err.message
+    const result = await apiStatsUtils.userUsage();
+    res.json({
+      message: messages.api.userUsage,
+      data: result
     });
+  } catch (err) {
+    sendErrorResponse(res, err);
   }
 });
 
@@ -364,16 +301,14 @@ app.get('/api/v1/apiAiUsage', async (req, res) => {
 });
 
 app.get('/api/v1/testdb', async (req, res) => {
-  // console.log("GET /apiUserUsage");
   try {
-    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
-    const result = await apiStatsUtils.testDb(req.body.query)
-    res.json(result)
-  } catch (err) {
-    res.status(500).json({
-      msg: messages.serverOrDbError,
-      error: err.message
+    const result = await apiStatsUtils.testDb(req.body.query);
+    res.json({
+      message: messages.db.querySuccess,
+      data: result
     });
+  } catch (err) {
+    sendErrorResponse(res, err);
   }
 });
 
