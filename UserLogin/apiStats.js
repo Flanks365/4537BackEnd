@@ -1,11 +1,14 @@
-const mysql = require('mysql2/promise');
+// const mysql = require('mysql2/promise');
 require('dotenv').config();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+// const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcryptjs');
+const fs = require('fs')
 
-const secretKey = process.env.JWT_SECRET_KEY;
+// const secretKey = process.env.JWT_SECRET_KEY;
 const Database = require('./database');
 const db = new Database();
+
+const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 
 class apiStatsUtils {
 
@@ -37,7 +40,7 @@ class apiStatsUtils {
         let result = await db.selectQuery(selectQuery);
 
         if (!result || result.length <= 0) {
-            throw new Error('User API usage not found')
+            throw new Error(messages.apiUsageNotFound)
         }
 
         const usage = result[0].api_usage
@@ -55,7 +58,7 @@ class apiStatsUtils {
 
     static async incrementUsage(userId, endpoint, method) {
         if (typeof userId !== 'number' && typeof userId !== 'string') {
-            throw new Error('Invalid user ID.')
+            throw new Error(messages.apiInvalidUser)
         }
 
         let selectQuery = `select * from ApiTracking where user_id = ${userId} and api_endpoint = '${endpoint}';`

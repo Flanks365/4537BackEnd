@@ -3,6 +3,11 @@
     "serverError": "Server error: ",
     "serverOrDbError": "Error connecting to the database or executing query",
     "noFile": "Audio file not found",
+    "apiUsageNotFound": "User API usage not found",
+    "apiInvalidUser": "Invalid user ID.",
+    "transcriptionFailed": "Failed to transcribe audio: ",
+    "gradingFailed": "Failed to grade answer",
+    "userDataNotFound": "User data could not be found.",
     "db": {
     "querySuccess": "Database query successful",
     "connectionError": "Error connecting to the database or executing query"
