@@ -250,11 +250,12 @@ app.post('/api/v1/checktoken', async (req, res) => {
 
 app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
   console.log("POST /transcribeQuestion");
-  if (!req.body.file) {
+  if (!req.file) {
     return res.status(400).json({ error: messages.noFile });
   }
 
   try {
+    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
     const questionText = await aiUtils.transcribeQuestion(req, res)
     await aiUtils.decrementUsage(req.body.userId)
     res.json(questionText)
@@ -269,6 +270,7 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
 app.post('/api/v1/gradeAnswer', async (req, res) => {
   console.log("POST /gradeAnswer");
   try {
+    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/gradeAnswer', 'POST')
     const gradedAnswer = await aiUtils.gradeAnswer(req, res)
     await aiUtils.decrementUsage(req.body.userId)
     res.json(gradedAnswer)
