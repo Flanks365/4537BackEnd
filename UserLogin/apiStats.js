@@ -32,6 +32,14 @@ class apiStatsUtils {
         return result
     }
 
+    static async testDb() {
+        let selectQuery = `select * from Session;`
+        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
+        let result = await db.selectQuery(selectQuery);
+
+        return result
+    }
+
     static async incrementUsage(userId, endpoint, method) {
         if (typeof userId !== 'number' && typeof userId !== 'string') {
             throw new Error('Invalid user ID.')

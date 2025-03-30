@@ -324,6 +324,20 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
   }
 });
 
+app.get('/api/v1/testdb', async (req, res) => {
+  // console.log("GET /apiUserUsage");
+  try {
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
+    const result = await apiStatsUtils.testDb()
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({
+      msg: messages.serverOrDbError,
+      error: err.message
+    });
+  }
+});
+
 server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
