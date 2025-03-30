@@ -226,7 +226,7 @@ class SessionTeacherUtils {
 
 class SessionStudentUtils {
     static async joinSession(req) {
-        try {
+        // try {
             throw new Error('in join session')
             const {session_code, token} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -258,13 +258,13 @@ class SessionStudentUtils {
                 sessionId: sessionId
             };
 
-        } catch (err) {
-            return {
-                success: false,
-                message: messages.errors.sessionJoinError,
-                error: err.message
-            };
-        }
+        // } catch (err) {
+        //     return {
+        //         success: false,
+        //         message: messages.errors.sessionJoinError,
+        //         error: err.message
+        //     };
+        // }
     }
 
     static async retrieveQuestion(req) {
