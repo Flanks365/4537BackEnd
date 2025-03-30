@@ -84,18 +84,11 @@ class SessionTeacherUtils {
             const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
-                return {
-                    success: false,
-                    message: messages.errors.sessionNotFound,
-                    is_active: false
-                };
+                return false;
             }
 
-            return {
-                success: true,
-                message: messages.success.sessionStatus,
-                is_active: result[0].is_active
-            };
+            return result[0].is_active
+           
 
         } catch (err) {
             return {
@@ -124,16 +117,10 @@ class SessionTeacherUtils {
             const result = await db.insertQuery(updateQuery);
             
             if (result.affectedRows === 0) {
-                return {
-                    success: false,
-                    message: messages.errors.sessionNotFound
-                };
+                return false;
             }
 
-            return {
-                success: true,
-                message: messages.success.sessionEnded
-            };
+            return true
 
         } catch (error) {
             return {
@@ -162,11 +149,8 @@ class SessionTeacherUtils {
                 throw new Error(messages.errors.questionCreationFailed);
             }
 
-            return {
-                success: true,
-                message: messages.success.questionCreated,
-                questionId: result[0].id
-            };
+            return result[0].id
+        
 
         } catch (err) {
             return {
@@ -232,11 +216,7 @@ class SessionTeacherUtils {
 
             const result = await db.selectQuery(selectQuery);
 
-            return {
-                success: true,
-                message: messages.success.answersRetrieved,
-                answers: result.length > 0 ? result : []
-            };
+            return result.length > 0 ? result : []
 
         } catch (err) {
             return {
@@ -294,18 +274,11 @@ class SessionStudentUtils {
             const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
-                return {
-                    success: true,
-                    message: messages.success.noActiveQuestion,
-                    question: null
-                };
+                return {};
             }
 
-            return {
-                success: true,
-                message: messages.success.questionRetrieved,
-                question: result[0]
-            };
+            return result[0].text;
+           
 
         } catch (err) {
             return {
@@ -331,11 +304,7 @@ class SessionStudentUtils {
             const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ('${answer}', ${correct_val}, '${questionId}', '${userId}')`;
             await db.insertQuery(insertQuery);
 
-            return {
-                success: true,
-                message: messages.success.answerReceived,
-                correctness: correct_val
-            };
+            return correct_val;
 
         } catch (err) {
             return {
