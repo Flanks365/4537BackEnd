@@ -50,6 +50,20 @@ class aiUtils{
             // res.status(500).json({ error: 'Failed to grade answer' });
         }
     }
+
+    static async decrementUsage(userId) {
+        let selectQuery = `select * from ApiTracking where user_id = ${userId} and api_endpoint = '${endpoint}';`
+        let result = await db.selectQuery(selectQuery)
+
+        if (!result || result.length <= 0) {
+            const insertQuery = `insert into ApiTracking (user_id, api_endpoint, counter, method) values (${userId}, '${endpoint}', 1, '${method}');`
+            await db.insertQuery(insertQuery)
+        } else {
+            const usage = result[0]
+            const updateQuery = `update ApiTracking set counter = ${usage.counter + 1} where user_id = ${userId} and api_endpoint = '${endpoint}';`
+            await db.updateQuery(updateQuery)
+        }
+    }
 }
 
 module.exports = aiUtils

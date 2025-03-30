@@ -23,7 +23,7 @@ class apiStatsUtils {
 
     static async userUsage() {
         let selectQuery = `select u.id as user_id, u.name, u.email, a.api_endpoint, a.method, sum(a.counter) as n_requests
-                            from User u inner join ApiTracking a on u.id = a.user_id
+                            from users u inner join ApiTracking a on u.id = a.user_id
                             group by u.id, u.name;`;
         // let selectQuery = `describe ApiTracking;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
