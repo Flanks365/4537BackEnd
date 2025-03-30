@@ -3,6 +3,7 @@ const axios = require('axios');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const apiStatsUtils = require('./apiStats')
 
 const Database = require('./database');
 const db = new Database();
