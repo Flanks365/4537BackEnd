@@ -2,6 +2,9 @@ require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
 
+const Database = require('./database');
+const db = new Database();
+
 const API_URL = process.env.AI_API_URL;
 const API_KEY = process.env.AI_API_KEY;
 
