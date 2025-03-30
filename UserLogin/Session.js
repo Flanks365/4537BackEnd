@@ -3,6 +3,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const apiStatsUtils = require('./apiStats')
+const aiUtils = require('./aiServices')
 
 const secretKey = process.env.JWT_SECRET_KEY;
 const Database = require('./database');
@@ -260,10 +261,11 @@ class SessionStudentUtils{
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
         await apiStatsUtils.incrementUsage(userId, '/api/v1/receiveAnswer', 'POST')
 
-        const grade = await axios.post(
-            'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
-            {question: req.body.question, answer: req.body.answer}
-        );
+        // const grade = await axios.post(
+        //     'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
+        //     {question: req.body.question, answer: req.body.answer}
+        // );
+        const grade = aiUtils.gradeAnswer(req.body.question, req.body.answer)
         const correct_val = await grade.data.score
         // let correct_val = 0.5;
 

@@ -39,14 +39,14 @@ class aiUtils{
         }
     }
 
-    static async gradeAnswer(req, res) {
+    static async gradeAnswer(question, answer) {
         try {
             const headers = {
                 'api-key': API_KEY,
                 'Content-Type': 'application/json'
             }
 
-            const answerText = `The following answer is relevant, and correctly and completely answers the question.\nQuestion: ${req.body.question}\nAnswer: ${req.body.answer}`
+            const answerText = `The following answer is relevant, and correctly and completely answers the question.\nQuestion: ${question}\nAnswer: ${answer}`
             const body = {
                 text: answerText
             }
