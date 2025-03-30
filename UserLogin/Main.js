@@ -300,7 +300,8 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
 
 app.get('/api/v1/apiEndpointUsage', async (req, res) => {
   try {
-    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiEndpointUsage', 'GET');
+    const userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiEndpointUsage', 'GET');
     const result = await apiStatsUtils.endpointUsage();
     res.json({
       message: messages.api.endpointUsage,
@@ -316,7 +317,8 @@ app.get('/api/v1/apiEndpointUsage', async (req, res) => {
 
 app.get('/api/v1/apiUserUsage', async (req, res) => {
   try {
-    const result = await apiStatsUtils.userUsage();
+    const userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiUserUsage', 'GET');
     res.json({
       message: messages.api.userUsage,
       data: result
@@ -332,10 +334,7 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
 app.get('/api/v1/apiAiUsage', async (req, res) => {
   console.log("GET /apiAiUsage");
   try {
-    let userId = 27
-    if (req.query.token) {
-      userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
-    }
+    const userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
     await apiStatsUtils.incrementUsage(userId, '/api/v1/apiAiUsage', 'GET')
     const result = await apiStatsUtils.aiUsage(userId)
     res.json(result)
