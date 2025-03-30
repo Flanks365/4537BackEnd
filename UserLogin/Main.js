@@ -250,12 +250,13 @@ app.post('/api/v1/checktoken', async (req, res) => {
 
 app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
   console.log("POST /transcribeQuestion");
-  if (!req.file) {
+  if (!req.body.file) {
     return res.status(400).json({ error: messages.noFile });
   }
 
   try {
     const questionText = await aiUtils.transcribeQuestion(req, res)
+    await aiUtils.decrementUsage(req.body.userId)
     res.json(questionText)
   } catch (err) {
     res.status(500).json({
