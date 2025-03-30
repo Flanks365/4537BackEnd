@@ -36,7 +36,13 @@ class apiStatsUtils {
         let selectQuery = `select api_usage from users where id=${userId};`;
         let result = await db.selectQuery(selectQuery);
 
-        return result
+        if (!result || result.length <= 0) {
+            throw new Error('User API usage not found')
+        }
+
+        const usage = result[0].api_usage
+
+        return usage
     }
 
     static async testDb(selectQuery) {
