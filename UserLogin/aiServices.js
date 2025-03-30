@@ -1,16 +1,23 @@
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const apiStatsUtils = require('./apiStats')
 
 const Database = require('./database');
 const db = new Database();
 
+const secretKey = process.env.JWT_SECRET_KEY;
 const API_URL = process.env.AI_API_URL;
 const API_KEY = process.env.AI_API_KEY;
 
 class aiUtils{
     static async transcribeQuestion(req, res) {
         try {
+            // const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
+            // await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
+
             const audioFilePath = req.file.path;
             const file = fs.createReadStream(audioFilePath)
             const headers = {
@@ -27,7 +34,7 @@ class aiUtils{
             return response.data; // {questionText}
         } catch (error) {
             console.error('Error:', error);
-            throw new Error('Failed to transcribe audio')
+            throw new Error('Failed to transcribe audio: ' + error)
             // res.status(500).json({ error: 'Failed to transcribe audio' });
         }
     }

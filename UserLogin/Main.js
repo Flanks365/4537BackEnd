@@ -10,8 +10,12 @@ const aiUtils = require('./aiServices')
 const apiStatsUtils = require('./apiStats')
 const cors = require('cors');
 const fs = require('fs')
+const jwt = require('jsonwebtoken');
+
+const secretKey = process.env.JWT_SECRET_KEY;
 
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
+// const messages = JSON.parse(fs.readFileSync('./UserLogin/lang/en/messages.json'));
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +37,10 @@ const db = new Database();
 const login = LoginUtils;  // No instantiation needed if methods are static
 const session = SessionTeacherUtils
 const sessionStudent = SessionStudentUtils
+
+const swaggerUIPath= require("swagger-ui-express");
+const swaggerjsonFilePath = require("./docs/swagger.json");
+app.use("/docs", swaggerUIPath.serve, swaggerUIPath.setup(swaggerjsonFilePath));
 
 
 app.get('/', async (req, res) => {
@@ -255,9 +263,11 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
   }
 
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
+    const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/transcribeQuestion', 'POST')
     const questionText = await aiUtils.transcribeQuestion(req, res)
-    await aiUtils.decrementUsage(req.body.userId)
+    await aiUtils.decrementUsage(userId)
     res.json(questionText)
   } catch (err) {
     res.status(500).json({
@@ -301,6 +311,34 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
   try {
     await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
     const result = await apiStatsUtils.userUsage()
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({
+      msg: messages.serverOrDbError,
+      error: err.message
+    });
+  }
+});
+
+app.get('/api/v1/apiUserUsage', async (req, res) => {
+  console.log("GET /apiUserUsage");
+  try {
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
+    const result = await apiStatsUtils.userUsage()
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({
+      msg: messages.serverOrDbError,
+      error: err.message
+    });
+  }
+});
+
+app.get('/api/v1/testdb', async (req, res) => {
+  // console.log("GET /apiUserUsage");
+  try {
+    // await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/apiUserUsage', 'GET')
+    const result = await apiStatsUtils.testDb(req.body.query)
     res.json(result)
   } catch (err) {
     res.status(500).json({

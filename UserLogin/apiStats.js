@@ -22,10 +22,18 @@ class apiStatsUtils {
     }
 
     static async userUsage() {
-        // let selectQuery = `select u.id as user_id, u.name, u.email, sum(a.counter) as n_requests
-        //                     from users u inner join ApiTracking a on u.id = a.user_id
-        //                     group by u.id, u.name;`;
-        let selectQuery = `select * from users;`
+        let selectQuery = `select u.id as user_id, u.name, u.email, sum(a.counter) as n_requests
+                            from users u inner join ApiTracking a on u.id = a.user_id
+                            group by u.id, u.name;`;
+        // let selectQuery = `select * from users;`
+        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
+        let result = await db.selectQuery(selectQuery);
+
+        return result
+    }
+
+    static async testDb(selectQuery) {
+        // let selectQuery = `select * from Session;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);
 

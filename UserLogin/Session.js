@@ -212,6 +212,7 @@ class SessionStudentUtils{
 
     //join
     static async joinSession(req,res){
+        // const {session_code} = req.body;
         const {session_code, token} = req.body;
 
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;

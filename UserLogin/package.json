@@ -4,7 +4,8 @@
   "description": "Handles user login logic",
   "main": "Login.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "swagger-autogen": "node ./docs/swagger.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +17,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^8.5.1",
     "multer": "^1.4.5-lts.2",
-    "mysql2": "^3.12.0"
+    "mysql2": "^3.12.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }
