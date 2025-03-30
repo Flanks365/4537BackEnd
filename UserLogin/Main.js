@@ -267,8 +267,9 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
 
 app.post('/api/v1/gradeAnswer', async (req, res) => {
   try {
-    await apiStatsUtils.incrementUsage(req.body.userId, '/api/v1/gradeAnswer', 'POST');
-    const gradedAnswer = await aiUtils.gradeAnswer(req, res);
+    const userId = jwt.verify(req.body.token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/gradeAnswer', 'POST');
+    const gradedAnswer = await aiUtils.gradeAnswer(req.body.question, req.body.answer);
     await aiUtils.decrementUsage(req.body.userId);
     res.json(gradedAnswer);
   } catch (err) {
