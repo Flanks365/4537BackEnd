@@ -266,7 +266,8 @@ class SessionStudentUtils{
         //     {question: req.body.question, answer: req.body.answer}
         // );
         const grade = await aiUtils.gradeAnswer(req.body.question, req.body.answer)
-        // return grade[0].score
+        return grade
+
         if (grade && grade.length > 0) {
             const correct_val = await grade[0].score
         } else {
