@@ -26,7 +26,7 @@ app.use(express.json());
 
 // Set up CORS to allow specific origin
 const corsOptions = {
-  origin: 'https://octopus-app-x9uen.ondigitalocean.app',  // Allow this origin
+  origin: '*',  // Allow this origin
   methods: ['GET', 'POST'],  // Adjust as needed for allowed methods
   credentials: true  // If you want to support cookies/session headers, set this to true
 };
