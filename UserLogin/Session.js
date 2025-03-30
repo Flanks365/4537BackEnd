@@ -257,7 +257,7 @@ class SessionStudentUtils{
     static async recieveAnswer(req,res){
         console.log('Receiving answer...');
 
-        const {token,questionId, answer} = req.body;
+        const {token,questionId, question, answer} = req.body;
         const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
         await apiStatsUtils.incrementUsage(userId, '/api/v1/receiveAnswer', 'POST')
 
@@ -265,7 +265,7 @@ class SessionStudentUtils{
         //     'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
         //     {question: req.body.question, answer: req.body.answer}
         // );
-        const gradeObj = await aiUtils.gradeAnswer(req.body.question, req.body.answer)
+        const gradeObj = await aiUtils.gradeAnswer(question, answer)
         // const grades = await gradeObj.grade
 
         if (!gradeObj.grade || gradeObj.grade.length <= 0) {
