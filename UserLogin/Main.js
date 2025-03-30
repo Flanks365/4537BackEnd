@@ -52,14 +52,6 @@ const login = LoginUtils;
 const session = SessionTeacherUtils;
 const sessionStudent = SessionStudentUtils;
 
-// Helper function for error responses
-const sendErrorResponse = (res, error) => {
-  res.status(500).json({
-    msg: messages.db.connectionError,
-    error: error.message
-  });
-};
-
 app.get('/', async (req, res) => {
   try {
     const results = await db.selectQuery('SELECT * FROM users');
@@ -68,7 +60,10 @@ app.get('/', async (req, res) => {
       data: results
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -81,7 +76,10 @@ app.post("/api/v1/createsession", async (req, res) => {
       sessionId: (await sessionres).sessionId,
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -93,7 +91,10 @@ app.post('/api/v1/joinsession', async (req, res) => {
       sessionId: result.sessionId
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -105,7 +106,10 @@ app.post('/api/v1/retrivequestion', async (req, res) => {
       question: question
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -117,7 +121,10 @@ app.post('/api/v1/recieveanswer', async (req, res) => {
       result: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -129,7 +136,10 @@ app.post('/api/v1/checksession', async (req, res) => {
       is_active: sessionStatus
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -141,7 +151,10 @@ app.post('/api/v1/destroysession', async (req, res) => {
       is_active: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -153,7 +166,10 @@ app.post('/api/v1/confirmquestion', async (req, res) => {
       questionId: questionId
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -164,7 +180,10 @@ app.post('/api/v1/endquestion', async (req, res) => {
       msg: messages.session.questionEnded
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -176,7 +195,10 @@ app.post('/api/v1/getanswers', async (req, res) => {
       answers: answers
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -184,7 +206,10 @@ app.post('/api/v1/signup', async (req, res) => {
   try {
     await login.routeRequest(req, res);
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -192,7 +217,10 @@ app.post('/api/v1/login', async (req, res) => {
   try {
     await login.routeRequest(req, res);
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -200,7 +228,10 @@ app.post('/api/v1/logout', async (req, res) => {
   try {
     await login.routeRequest(req, res);
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -208,7 +239,10 @@ app.post('/api/v1/checktoken', async (req, res) => {
   try {
     await login.routeRequest(req, res);
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -254,7 +288,10 @@ app.post('/api/v1/apiEndpointUsage', async (req, res) => {
       data: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -267,7 +304,10 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
       data: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
@@ -279,15 +319,16 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
       data: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
 app.get('/api/v1/apiAiUsage', async (req, res) => {
   console.log("GET /apiAiUsage");
   try {
-    // const {token} = req.body;
-    // const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
     const userId = 27
     await apiStatsUtils.incrementUsage(userId, '/api/v1/apiAiUsage', 'GET')
     const result = await apiStatsUtils.aiUsage(userId)
@@ -308,7 +349,10 @@ app.get('/api/v1/testdb', async (req, res) => {
       data: result
     });
   } catch (err) {
-    sendErrorResponse(res, err);
+    res.status(500).json({
+      msg: messages.db.connectionError,
+      error: err.message
+    });
   }
 });
 
