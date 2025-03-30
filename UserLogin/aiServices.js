@@ -52,15 +52,14 @@ class aiUtils{
     }
 
     static async decrementUsage(userId) {
-        let selectQuery = `select * from ApiTracking where user_id = ${userId} and api_endpoint = '${endpoint}';`
+        let selectQuery = `select * from users where user_id = ${userId};`
         let result = await db.selectQuery(selectQuery)
 
         if (!result || result.length <= 0) {
-            const insertQuery = `insert into ApiTracking (user_id, api_endpoint, counter, method) values (${userId}, '${endpoint}', 1, '${method}');`
-            await db.insertQuery(insertQuery)
+            throw new Error('User could not be found.')
         } else {
-            const usage = result[0]
-            const updateQuery = `update ApiTracking set counter = ${usage.counter + 1} where user_id = ${userId} and api_endpoint = '${endpoint}';`
+            const user = result[0]
+            const updateQuery = `update users set api_usage = ${Math.max(0, user.api_usage - 1)} where user_id = ${userId};`
             await db.updateQuery(updateQuery)
         }
     }
