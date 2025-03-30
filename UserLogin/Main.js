@@ -276,10 +276,10 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
   }
 });
 
-app.get('/api/v1/apiEndpointUsage', async (req, res) => {
+app.post('/api/v1/apiEndpointUsage', async (req, res) => {
   console.log("GET /apiEndpointUsage");
   try {
-    await apiStatsUtils.incrementUsage(27, '/api/v1/apiEndpointUsage', 'GET')
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiEndpointUsage', 'GET')
     const result = await apiStatsUtils.endpointUsage(req, res)
     res.json(result)
   } catch (err) {
@@ -290,10 +290,10 @@ app.get('/api/v1/apiEndpointUsage', async (req, res) => {
   }
 });
 
-app.get('/api/v1/apiUserUsage', async (req, res) => {
+app.post('/api/v1/apiUserUsage', async (req, res) => {
   console.log("GET /apiUserUsage");
   try {
-    await apiStatsUtils.incrementUsage(27, '/api/v1/apiUserUsage', 'GET')
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/apiUserUsage', 'GET')
     const result = await apiStatsUtils.userUsage(req, res)
     res.json(result)
   } catch (err) {
