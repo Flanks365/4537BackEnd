@@ -2,5 +2,71 @@
     "dbQuerySuccess": "Database connection and query successful",
     "serverError": "Server error: ",
     "serverOrDbError": "Error connecting to the database or executing query",
-    "noFile": "Audio file not found"
+    "noFile": "Audio file not found",
+    "db": {
+    "querySuccess": "Database query successful",
+    "connectionError": "Error connecting to the database or executing query"
+  },
+  "session": {
+    "created": "Session created successfully!",
+    "joined": "Session joined successfully!",
+    "destroyed": "Session destroyed successfully!",
+    "checked": "Session checked successfully!",
+    "questionConfirmed": "Question confirmed successfully!",
+    "questionEnded": "Question ended successfully!",
+    "answersRetrieved": "Answers retrieved successfully!",
+    "questionRetrieved": "Question retrieved successfully!",
+    "answerReceived": "Answer received successfully!"
+  },
+  "auth": {
+    "noFile": "No file was uploaded",
+    "serverError": "Server error occurred",
+    "invalidToken": "Invalid token provided"
+  },
+  "api": {
+    "endpointUsage": "Endpoint usage data retrieved",
+    "userUsage": "User usage data retrieved"
+  },
+  "success": {
+    "login": "Successful login",
+    "signup": "User registered successfully",
+    "validToken": "Token is valid",
+    "logout": "Successfully logged out",
+    "sessionCreated": "Session created successfully",
+    "sessionStatus": "Session status retrieved",
+    "sessionEnded": "Session ended successfully",
+    "questionCreated": "Question created successfully",
+    "questionEnded": "Question ended successfully",
+    "answersRetrieved": "Answers retrieved successfully",
+    "noActiveQuestion": "No active question found",
+    "sessionJoined": "Successfully joined session",
+    "questionRetrieved": "Question retrieved successfully",
+    "answerReceived": "Answer received successfully"
+  },
+  "errors": {
+    "invalidCredentials": "Invalid email or password",
+    "duplicateEmail": "Email already exists",
+    "userNotFound": "User not found",
+    "noTokenProvided": "No token provided",
+    "invalidToken": "Invalid or expired token",
+    "invalidEndpoint": "Invalid endpoint",
+    "loginProcess": "Error during login process",
+    "signupProcess": "Error during signup process",
+    "tokenVerification": "Error during token verification",
+    "logoutProcess": "Error during logout",
+    "sessionCreationFailed": "Session creation failed",
+    "sessionCreationError": "Error creating session",
+    "sessionNotFound": "Session not found",
+    "sessionCheckError": "Error checking session status",
+    "missingSessionId": "Session ID is required",
+    "sessionEndError": "Error ending session",
+    "questionCreationFailed": "Question creation failed",
+    "questionCreationError": "Error creating question",
+    "questionEndError": "Error ending question",
+    "answersRetrievalError": "Error retrieving answers",
+    "sessionJoinError": "Error joining session",
+    "questionRetrievalError": "Error retrieving question",
+    "answerGradingFailed": "Answer could not be graded",
+    "answerSubmissionError": "Error submitting answer"
+  }
 }
