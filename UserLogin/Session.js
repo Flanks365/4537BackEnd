@@ -22,7 +22,7 @@ class SessionTeacherUtils {
         return code;
     }
 
-    static async createSession(req, res) {
+    static async createSession(req) {
         try {
             let randomCode = this.prototype.generateRandomCode();
             let selectQuery = `SELECT * FROM Session WHERE session_code = '${randomCode}'`;
@@ -59,21 +59,22 @@ class SessionTeacherUtils {
             await db.insertQuery(userSessionQuery);
 
             return {
+                success: true,
                 code: randomCode, 
                 sessionId: sessionId,
                 message: messages.success.sessionCreated
             };
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.sessionCreationError,
                 error: err.message
-            });
-            throw err;
+            };
         }
     }
 
-    static async checkSession(req, res) {
+    static async checkSession(req) {
         try {
             const { token, sessionCode } = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -83,35 +84,32 @@ class SessionTeacherUtils {
             const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
-                return res.status(404).json({
-                    message: messages.errors.sessionNotFound,
-                    is_active: false
-                });
+                return false;
             }
 
-            return res.json({
-                message: messages.success.sessionStatus,
-                is_active: result[0].is_active
-            });
+            return result[0].is_active
+           
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.sessionCheckError,
                 error: err.message
-            });
+            };
         }
     }
 
-    static async destroySession(req, res) {
+    static async destroySession(req) {
         try {
             const {token} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/destroySession', 'POST');
 
             if (!req.body || !req.body.sessionId) {
-                return res.status(400).json({
+                return {
+                    success: false,
                     message: messages.errors.missingSessionId
-                });
+                };
             }
 
             const { sessionId } = req.body;
@@ -119,30 +117,27 @@ class SessionTeacherUtils {
             const result = await db.insertQuery(updateQuery);
             
             if (result.affectedRows === 0) {
-                return res.status(404).json({
-                    message: messages.errors.sessionNotFound
-                });
+                return false;
             }
 
-            return res.json({
-                message: messages.success.sessionEnded
-            });
+            return true
 
         } catch (error) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.sessionEndError,
                 error: error.message
-            });
+            };
         }
     }
 
-    static async recieveQuestions(req, res) {
+    static async recieveQuestions(req) {
         try {
             const { token, sessionId, question } = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/receiveQuestions', 'POST');
 
-            await this.endQuestion(req, res);
+            await this.endQuestion(req);
 
             const insertQuery = `INSERT INTO Question (session_id, text) VALUES ('${sessionId}', '${question}')`;
             await db.insertQuery(insertQuery);
@@ -154,20 +149,19 @@ class SessionTeacherUtils {
                 throw new Error(messages.errors.questionCreationFailed);
             }
 
-            return res.json({
-                message: messages.success.questionCreated,
-                questionId: result[0].id
-            });
+            return result[0].id
+        
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.questionCreationError,
                 error: err.message
-            });
+            };
         }
     }
 
-    static async endQuestion(req, res) {
+    static async endQuestion(req) {
         try {
             const { token, sessionId } = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -181,19 +175,21 @@ class SessionTeacherUtils {
                 await db.insertQuery(updateQuery);
             }
 
-            return res.json({
+            return {
+                success: true,
                 message: messages.success.questionEnded
-            });
+            };
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.questionEndError,
                 error: err.message
-            });
+            };
         }
     }
 
-    static async retrieveAnswers(req, res) {
+    static async retrieveAnswers(req) {
         try {
             const {token, sessionId} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -203,10 +199,11 @@ class SessionTeacherUtils {
             const questionResult = await db.selectQuery(questionQuery);
 
             if (questionResult.length === 0) {
-                return res.json({
+                return {
+                    success: true,
                     message: messages.success.noActiveQuestion,
                     answers: []
-                });
+                };
             }
 
             const questionId = questionResult[0].id;
@@ -219,22 +216,20 @@ class SessionTeacherUtils {
 
             const result = await db.selectQuery(selectQuery);
 
-            return res.json({
-                message: messages.success.answersRetrieved,
-                answers: result.length > 0 ? result : []
-            });
+            return result.length > 0 ? result : []
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.answersRetrievalError,
                 error: err.message
-            });
+            };
         }
     }
 }
 
 class SessionStudentUtils {
-    static async joinSession(req, res) {
+    static async joinSession(req) {
         try {
             const {session_code, token} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -244,29 +239,32 @@ class SessionStudentUtils {
             const sessionResult = await db.selectQuery(sessionQuery);
 
             if (sessionResult.length === 0) {
-                return res.status(404).json({
+                return {
+                    success: false,
                     message: messages.errors.sessionNotFound
-                });
+                };
             }
 
             const sessionId = sessionResult[0].id;
             const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
             await db.insertQuery(userSessionQuery);
 
-            return res.json({
+            return {
+                success: true,
                 message: messages.success.sessionJoined,
                 sessionId: sessionId
-            });
+            };
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.sessionJoinError,
                 error: err.message
-            });
+            };
         }
     }
 
-    static async retrieveQuestion(req, res) {
+    static async retrieveQuestion(req) {
         try {
             const { token, sessionId } = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -276,26 +274,22 @@ class SessionStudentUtils {
             const result = await db.selectQuery(selectQuery);
 
             if (result.length === 0) {
-                return res.json({
-                    message: messages.success.noActiveQuestion,
-                    question: null
-                });
+                return {};
             }
 
-            return res.json({
-                message: messages.success.questionRetrieved,
-                question: result[0]
-            });
+            return result[0];
+           
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.questionRetrievalError,
                 error: err.message
-            });
+            };
         }
     }
 
-    static async recieveAnswer(req, res) {
+    static async recieveAnswer(req) {
         try {
             const {token, questionId, question, answer} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
@@ -310,16 +304,14 @@ class SessionStudentUtils {
             const insertQuery = `INSERT INTO Answer (text, correctness, question_id, user_id) VALUES ('${answer}', ${correct_val}, '${questionId}', '${userId}')`;
             await db.insertQuery(insertQuery);
 
-            return res.json({
-                message: messages.success.answerReceived,
-                correctness: correct_val
-            });
+            return correct_val;
 
         } catch (err) {
-            res.status(500).json({
+            return {
+                success: false,
                 message: messages.errors.answerSubmissionError,
                 error: err.message
-            });
+            };
         }
     }
 }
