@@ -21,6 +21,14 @@
       "description": "API for managing quiz sessions/rooms where teachers can show questions and students can answer them"
     },
     {
+      "name": "Question",
+      "description": "API for managing quiz questions"
+    },
+    {
+      "name": "Answer",
+      "description": "API for managing quiz answer"
+    },
+    {
       "name": "AI Services",
       "description": "API for accessing AI services for transcribing question audio and grading answer correctness"
     },
@@ -44,6 +52,23 @@
       "post": {
         "description": "",
         "tags": ["Quiz Session"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  }
+                },
+                "required": ["token"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -58,6 +83,27 @@
       "post": {
         "description": "",
         "tags": ["Quiz Session"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "session_code": {
+                    "type": "string",
+                    "description": "Code of the quiz session to join"
+                  }
+                },
+                "required": ["token", "session_code"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -70,7 +116,29 @@
     },
     "/api/v1/retrivequestion": {
       "post": {
-        "description": "",
+        "description": "Get the current question of the session that the user is currently in.",
+        "tags": ["Question"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Code of the quiz session to join"
+                  }
+                },
+                "required": ["token", "sessionId"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -83,7 +151,37 @@
     },
     "/api/v1/recieveanswer": {
       "post": {
-        "description": "",
+        "description": "Send an answer for the current question of the current session.",
+        "tags": ["Answer"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "questionId": {
+                    "type": "string",
+                    "description": "Id of the question to answer"
+                  },
+                  "question": {
+                    "type": "string",
+                    "description": "Text of the question to answer"
+                  },
+                  "answer": {
+                    "type": "string",
+                    "description": "Text of the answer to the question"
+                  }
+                },
+                "required": ["token", "question", "questionId", "answer"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -96,8 +194,29 @@
     },
     "/api/v1/checksession": {
       "post": {
-        "description": "",
+        "description": "Check if the given session is active.",
         "tags": ["Quiz Session"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionCode": {
+                    "type": "string",
+                    "description": "Join code of the session to check"
+                  }
+                },
+                "required": ["token", "sessionCode"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -110,8 +229,29 @@
     },
     "/api/v1/destroysession": {
       "post": {
-        "description": "",
+        "description": "End the given session.",
         "tags": ["Quiz Session"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Id of the session to end"
+                  }
+                },
+                "required": ["token", "sessionId"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -124,7 +264,33 @@
     },
     "/api/v1/confirmquestion": {
       "post": {
-        "description": "",
+        "description": "Confirms the current question of the session that the user is in (adds the question to the database).",
+        "tags": ["Question"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Id of the session to which question will be added"
+                  },
+                  "question": {
+                    "type": "string",
+                    "description": "Text of the question to answer"
+                  }
+                },
+                "required": ["token", "sessionId", "question"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -137,7 +303,29 @@
     },
     "/api/v1/endquestion": {
       "post": {
-        "description": "",
+        "description": "End the answering period for the current question.",
+        "tags": ["Quiz Session"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Id of the session for which question will be ended"
+                  }
+                },
+                "required": ["token", "sessionId"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -150,7 +338,29 @@
     },
     "/api/v1/getanswers": {
       "post": {
-        "description": "",
+        "description": "Get all answers to the current question of the given session.",
+        "tags": ["Answer"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Id of the session for which answers will be retrieved"
+                  }
+                },
+                "required": ["token", "sessionId"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -204,26 +414,27 @@
       "post": {
         "description": "Log the user into the app (creates a JWT for the user).",
         "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "email",
-            "in": "body",
-            "description": "User email",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "password",
-            "in": "body",
-            "description": "User password",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the user"
+                  }
+                },
+                "required": ["email", "password"]
+              }
             }
           }
-        ],
+        },
         "responses": {
           "404": {
             "description": "Not Found"
@@ -238,17 +449,23 @@
       "post": {
         "description": "Logs the user out of the app (removes their token from the active session database).",
         "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "body",
-            "description": "User JWT",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  }
+                },
+                "required": ["token"]
+              }
             }
           }
-        ],
+        },
         "responses": {
           "404": {
             "description": "Not Found"
@@ -263,15 +480,23 @@
       "post": {
         "description": "Check validity of a user JWT.",
         "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "body",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  }
+                },
+                "required": ["token"]
+              }
             }
           }
-        ],
+        },
         "responses": {
           "404": {
             "description": "Not Found"
@@ -284,7 +509,7 @@
     },
     "/api/v1/transcribeQuestion": {
       "post": {
-        "description": "",
+        "description": "Uses AI to transcribe the given audio file to question text.",
         "tags": ["AI Services"],
         "parameters": [
           {
@@ -315,8 +540,29 @@
     },
     "/api/v1/gradeAnswer": {
       "post": {
-        "description": "",
+        "description": "Uses AI to grade how correct the given answer is to the given question.",
         "tags": ["AI Services"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "User JWT"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Id of the session for which question will be ended"
+                  }
+                },
+                "required": ["token", "sessionId"]
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "name": "body",
@@ -343,7 +589,7 @@
     },
     "/api/v1/apiEndpointUsage": {
       "post": {
-        "description": "",
+        "description": "Gets the total number of requests to each endpoint of the API.",
         "tags": ["API Usage"],
         "parameters": [
           {
@@ -371,7 +617,7 @@
     },
     "/api/v1/apiUserUsage": {
       "post": {
-        "description": "",
+        "description": "Gets the total number of requests to the API for each user.",
         "tags": ["API Usage"],
         "parameters": [
           {
