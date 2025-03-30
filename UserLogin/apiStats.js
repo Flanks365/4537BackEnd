@@ -9,8 +9,22 @@ const db = new Database();
 
 class apiStatsUtils {
 
-    static async getUsage() {
-        let selectQuery = `select * from ApiTracking;`;
+    static async endpointUsage() {
+        // let selectQuery = `select * from ApiTracking;`;
+        // let selectQuery = `describe ApiTracking;`
+        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
+        let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
+                            from ApiTracking
+                            group by api_endpoint;`;
+        let result = await db.selectQuery(selectQuery);
+
+        return result
+    }
+
+    static async userUsage() {
+        let selectQuery = `select u.id as user_id, u.name, u.email, a.api_endpoint, a.method, sum(a.counter) as n_requests
+                            from users u inner join api_usage a on u.id = a.user_id
+                            group by u.id, u.name;`;
         // let selectQuery = `describe ApiTracking;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
         let result = await db.selectQuery(selectQuery);

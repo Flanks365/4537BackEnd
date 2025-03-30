@@ -275,11 +275,25 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
   }
 });
 
-app.get('/api/v1/apiStats', async (req, res) => {
-  console.log("GET /apiStats");
-  await apiStatsUtils.incrementUsage(27, '/api/v1/apiStats', 'GET')
+app.get('/api/v1/apiEndpointUsage', async (req, res) => {
+  console.log("GET /apiEndpointUsage");
+  await apiStatsUtils.incrementUsage(27, '/api/v1/apiEndpointUsage', 'GET')
   try {
-    const result = await apiStatsUtils.getUsage(req, res)
+    const result = await apiStatsUtils.endpointUsage(req, res)
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({
+      msg: 'Error connecting to the database or executing query',
+      error: err.message
+    });
+  }
+});
+
+app.get('/api/v1/apiUserUsage', async (req, res) => {
+  console.log("GET /apiUserUsage");
+  await apiStatsUtils.incrementUsage(27, '/api/v1/apiUserUsage', 'GET')
+  try {
+    const result = await apiStatsUtils.userUsage(req, res)
     res.json(result)
   } catch (err) {
     res.status(500).json({
