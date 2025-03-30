@@ -265,9 +265,14 @@ class SessionStudentUtils{
         //     'https://dolphin-app-nxbr6.ondigitalocean.app/api/v1/gradeanswer/', 
         //     {question: req.body.question, answer: req.body.answer}
         // );
-        const grade = aiUtils.gradeAnswer(req.body.question, req.body.answer)
+        const grade = await aiUtils.gradeAnswer(req.body.question, req.body.answer)
         // return grade[0].score
-        const correct_val = await grade[0].score
+        if (grade && grade.length > 0) {
+            const correct_val = await grade[0].score
+        } else {
+            throw new Error('Answer could not be graded')
+        }
+        
         // let correct_val = 0.5;
 
         console.log(`Inserting answer: ${answer}`);
