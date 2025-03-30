@@ -319,6 +319,7 @@ app.get('/api/v1/apiUserUsage', async (req, res) => {
   try {
     const userId = jwt.verify(req.query.token, secretKey, { algorithms: ['HS256'] }).userId;
     await apiStatsUtils.incrementUsage(userId, '/api/v1/apiUserUsage', 'GET');
+    const result = await apiStatsUtils.userUsage();
     res.json({
       message: messages.api.userUsage,
       data: result
