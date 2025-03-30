@@ -24,6 +24,11 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
 
+const swaggerUIPath= require("swagger-ui-express");
+const swaggerDocument = require("./docs/swagger.json");
+app.use("/docs", swaggerUIPath.serve);
+app.get("/docs", swaggerUIPath.setup(swaggerDocument));
+
 // Set up CORS to allow specific origin
 const corsOptions = {
   origin: '*',  // Allow this origin
@@ -38,9 +43,6 @@ const login = LoginUtils;  // No instantiation needed if methods are static
 const session = SessionTeacherUtils
 const sessionStudent = SessionStudentUtils
 
-const swaggerUIPath= require("swagger-ui-express");
-const swaggerjsonFilePath = require("./docs/swagger.json");
-app.use("/docs", swaggerUIPath.serve, swaggerUIPath.setup(swaggerjsonFilePath));
 
 
 app.get('/', async (req, res) => {
