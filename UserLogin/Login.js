@@ -9,15 +9,6 @@ const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 const secretKey = process.env.JWT_SECRET_KEY;
 const db = new Database();
 
-// Helper function for error responses
-const sendErrorResponse = (res, statusCode, errorType, error = null) => {
-  const response = {
-    msg: messages.errors[errorType],
-    ...(error && { error: error.message })
-  };
-  res.status(statusCode).json(response);
-};
-
 async function checkLogin(req, res) {
     try {
         const { email, password } = req.body;
@@ -27,14 +18,18 @@ async function checkLogin(req, res) {
         const result = await db.selectQuery(query);
 
         if (result.length === 0) {
-            return sendErrorResponse(res, 401, 'invalidCredentials');
+            return res.status(401).json({
+                msg: messages.errors.invalidCredentials
+            });
         }
 
         const user = result[0];
         const match = await bcrypt.compare(password, user.password);
 
         if (!match) {
-            return sendErrorResponse(res, 401, 'invalidCredentials');
+            return res.status(401).json({
+                msg: messages.errors.invalidCredentials
+            });
         }
 
         // Delete any existing token for the user
@@ -63,7 +58,10 @@ async function checkLogin(req, res) {
         });
 
     } catch (err) {
-        sendErrorResponse(res, 500, 'loginProcess', err);
+        res.status(500).json({
+            msg: messages.errors.loginProcess,
+            error: err.message
+        });
     }
 }
 
@@ -75,7 +73,9 @@ async function checkSignup(req, res) {
         const result = await db.selectQuery(checkEmailQuery);
 
         if (result.length > 0) {
-            return sendErrorResponse(res, 400, 'duplicateEmail');
+            return res.status(400).json({
+                msg: messages.errors.duplicateEmail
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -90,7 +90,9 @@ async function checkSignup(req, res) {
         );
 
         if (userResult.length === 0) {
-            return sendErrorResponse(res, 404, 'userNotFound');
+            return res.status(404).json({
+                msg: messages.errors.userNotFound
+            });
         }
 
         const userId = userResult[0].id;
@@ -118,14 +120,19 @@ async function checkSignup(req, res) {
         });
 
     } catch (err) {
-        sendErrorResponse(res, 500, 'signupProcess', err);
+        res.status(500).json({
+            msg: messages.errors.signupProcess,
+            error: err.message
+        });
     }
 }
 
 async function checkToken(req, res) {
     const { token } = req.body;
     if (!token) {
-        return sendErrorResponse(res, 400, 'noTokenProvided');
+        return res.status(400).json({
+            msg: messages.errors.noTokenProvided
+        });
     }
 
     try {
@@ -136,7 +143,9 @@ async function checkToken(req, res) {
         );
 
         if (tokenResult.length === 0) {
-            return sendErrorResponse(res, 401, 'invalidToken');
+            return res.status(401).json({
+                msg: messages.errors.invalidToken
+            });
         }
 
         const userResult = await db.selectQuery(
@@ -144,7 +153,9 @@ async function checkToken(req, res) {
         );
 
         if (userResult.length === 0) {
-            return sendErrorResponse(res, 404, 'userNotFound');
+            return res.status(404).json({
+                msg: messages.errors.userNotFound
+            });
         }
 
         res.json({
@@ -153,21 +164,29 @@ async function checkToken(req, res) {
         });
 
     } catch (err) {
-        sendErrorResponse(res, 401, 'tokenVerification', err);
+        res.status(401).json({
+            msg: messages.errors.tokenVerification,
+            error: err.message
+        });
     }
 }
 
 async function logOut(req, res) {
     const { token } = req.body;
     if (!token) {
-        return sendErrorResponse(res, 400, 'noTokenProvided');
+        return res.status(400).json({
+            msg: messages.errors.noTokenProvided
+        });
     }
 
     try {
         await db.deleteQuery(`DELETE FROM validTokens WHERE token = '${token}'`);
         res.json({ msg: messages.success.logout });
     } catch (err) {
-        sendErrorResponse(res, 500, 'logoutProcess', err);
+        res.status(500).json({
+            msg: messages.errors.logoutProcess,
+            error: err.message
+        });
     }
 }
 
@@ -182,7 +201,9 @@ class LoginUtils {
         } else if (req.originalUrl === '/api/v1/logout') {
             logOut(req, res);
         } else {
-            sendErrorResponse(res, 404, 'invalidEndpoint');
+            res.status(404).json({
+                msg: messages.errors.invalidEndpoint
+            });
         }
     }
 }
