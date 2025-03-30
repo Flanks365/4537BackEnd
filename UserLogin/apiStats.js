@@ -12,10 +12,10 @@ class apiStatsUtils {
     static async endpointUsage() {
         // let selectQuery = `select * from ApiTracking;`;
         // let selectQuery = `describe ApiTracking;`
-        let selectQuery = `show tables;`
-        // let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
-        //                     from ApiTracking
-        //                     group by api_endpoint, method;`;
+        // let selectQuery = `show tables;`
+        let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
+                            from ApiTracking
+                            group by api_endpoint, method;`;
         let result = await db.selectQuery(selectQuery);
 
         return result

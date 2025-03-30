@@ -266,6 +266,7 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
   console.log("POST /gradeAnswer");
   try {
     const gradedAnswer = await aiUtils.gradeAnswer(req, res)
+    await aiUtils.decrementUsage(req.body.userId)
     res.json(gradedAnswer)
   } catch (err) {
     res.status(500).json({
@@ -277,8 +278,8 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
 
 app.get('/api/v1/apiEndpointUsage', async (req, res) => {
   console.log("GET /apiEndpointUsage");
-  await apiStatsUtils.incrementUsage(27, '/api/v1/apiEndpointUsage', 'GET')
   try {
+    await apiStatsUtils.incrementUsage(27, '/api/v1/apiEndpointUsage', 'GET')
     const result = await apiStatsUtils.endpointUsage(req, res)
     res.json(result)
   } catch (err) {
@@ -291,8 +292,8 @@ app.get('/api/v1/apiEndpointUsage', async (req, res) => {
 
 app.get('/api/v1/apiUserUsage', async (req, res) => {
   console.log("GET /apiUserUsage");
-  await apiStatsUtils.incrementUsage(27, '/api/v1/apiUserUsage', 'GET')
   try {
+    await apiStatsUtils.incrementUsage(27, '/api/v1/apiUserUsage', 'GET')
     const result = await apiStatsUtils.userUsage(req, res)
     res.json(result)
   } catch (err) {
