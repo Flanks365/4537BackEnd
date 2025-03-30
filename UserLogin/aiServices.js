@@ -1,6 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 
 const Database = require('./database');
 const db = new Database();
