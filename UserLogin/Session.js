@@ -266,8 +266,8 @@ class SessionStudentUtils{
         //     {question: req.body.question, answer: req.body.answer}
         // );
         const grade = aiUtils.gradeAnswer(req.body.question, req.body.answer)
-        return grade
-        const correct_val = await grade.data.score
+        // return grade[0].score
+        const correct_val = await grade[0].score
         // let correct_val = 0.5;
 
         console.log(`Inserting answer: ${answer}`);
