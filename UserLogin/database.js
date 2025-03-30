@@ -9,7 +9,7 @@ class Database {
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
       port: process.env.PORT_DB,
-      connectionLimit: 10, // Adjust based on your needs
+      connectionLimit: 50, // Adjust based on your needs
     });
   }
 
