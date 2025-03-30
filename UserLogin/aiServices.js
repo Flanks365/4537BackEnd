@@ -55,7 +55,7 @@ class aiUtils{
                 text: answerText
             }
 
-            console.log('grading prompt: ' + text)
+            console.log('grading prompt: ' + answerText)
 
             const response = await axios.post(API_URL + 'gradeanswer', body, {headers: headers});
     
