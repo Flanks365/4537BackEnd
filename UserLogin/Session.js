@@ -266,14 +266,13 @@ class SessionStudentUtils{
         //     {question: req.body.question, answer: req.body.answer}
         // );
         const gradeObj = await aiUtils.gradeAnswer(req.body.question, req.body.answer)
-        const grade = await gradeObj.grade[0]
-        return grade
+        // const grades = await gradeObj.grade
 
-        if (grade && grade.length > 0) {
-            const correct_val = await grade[0].score
-        } else {
+        if (!gradeObj.grade || gradeObj.grade.length <= 0) {
             throw new Error('Answer could not be graded')
         }
+
+        const correct_val = await gradeObj.grade[0].score
         
         // let correct_val = 0.5;
 
