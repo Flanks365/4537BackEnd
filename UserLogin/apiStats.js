@@ -12,10 +12,10 @@ class apiStatsUtils {
     static async endpointUsage() {
         // let selectQuery = `select * from ApiTracking;`;
         // let selectQuery = `describe ApiTracking;`
-        // let selectQuery = `alter table ApiTracking add column method varchar(10);`
-        let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
-                            from ApiTracking
-                            group by api_endpoint, method;`;
+        let selectQuery = `show tables;`
+        // let selectQuery = `select api_endpoint, method, sum(counter) AS n_requests
+        //                     from ApiTracking
+        //                     group by api_endpoint, method;`;
         let result = await db.selectQuery(selectQuery);
 
         return result
@@ -23,7 +23,7 @@ class apiStatsUtils {
 
     static async userUsage() {
         let selectQuery = `select u.id as user_id, u.name, u.email, a.api_endpoint, a.method, sum(a.counter) as n_requests
-                            from Users u inner join ApiTracking a on u.id = a.user_id
+                            from User u inner join ApiTracking a on u.id = a.user_id
                             group by u.id, u.name;`;
         // let selectQuery = `describe ApiTracking;`
         // let selectQuery = `alter table ApiTracking add column method varchar(10);`
