@@ -277,7 +277,7 @@ class SessionStudentUtils {
                 return {};
             }
 
-            return result[0].text;
+            return result[0];
            
 
         } catch (err) {
