@@ -14,6 +14,7 @@ const API_KEY = process.env.AI_API_KEY;
 class aiUtils{
     static async transcribeQuestion(req, res) {
         try {
+            throw Error('req: ' + JSON.stringify(req))
             const userId = jwt.verify(req.token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/transcribeQuestion', 'POST')
 
