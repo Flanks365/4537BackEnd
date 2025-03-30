@@ -29,11 +29,21 @@ const swaggerDocument = require("./docs/swagger.json");
 app.use("/docs", swaggerUIPath.serve);
 app.get("/docs", swaggerUIPath.setup(swaggerDocument));
 
-// Set up CORS to allow specific origin
 const corsOptions = {
-  origin: '*',  // Allow this origin
-  methods: ['GET', 'POST'],  // Adjust as needed for allowed methods
-  credentials: true  // If you want to support cookies/session headers, set this to true
+  origin: [
+    'https://octopus-app-x9uen.ondigitalocean.app', // Your main app
+    'http://localhost:8080', // For local development
+    'https://cdn.jsdelivr.net' // For Swagger UI assets
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // All needed methods
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 };
 
 app.use(cors(corsOptions));
