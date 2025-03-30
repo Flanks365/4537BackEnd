@@ -12,6 +12,8 @@ const cors = require('cors');
 const fs = require('fs')
 const jwt = require('jsonwebtoken');
 
+const secretKey = process.env.JWT_SECRET_KEY;
+
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 // const messages = JSON.parse(fs.readFileSync('./UserLogin/lang/en/messages.json'));
 
