@@ -33,7 +33,7 @@ class apiStatsUtils {
     }
 
     static async incrementUsage(userId, endpoint, method) {
-        if (typeof userId !== 'string') {
+        if (typeof userId !== 'number' && typeof userId !== 'string') {
             throw new Error('Invalid user ID.')
         }
 

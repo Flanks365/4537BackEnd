@@ -9,6 +9,9 @@ const { SessionTeacherUtils, SessionStudentUtils } = require('./Session');
 const aiUtils = require('./aiServices')
 const apiStatsUtils = require('./apiStats')
 const cors = require('cors');
+const fs = require('fs')
+
+const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 
 const app = express();
 const server = http.createServer(app);
@@ -37,7 +40,7 @@ app.get('/', async (req, res) => {
   try {
     const results = await db.selectQuery('SELECT * FROM users');
     res.json({
-      message: 'Database connection and query successful',
+      message: messages.dbQuerySuccess,
       data: results
     });
   } catch (err) {
@@ -248,7 +251,7 @@ app.post('/api/v1/checktoken', async (req, res) => {
 app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) => {
   console.log("POST /transcribeQuestion");
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return res.status(400).json({ error: messages.noFile });
   }
 
   try {
@@ -256,7 +259,7 @@ app.post('/api/v1/transcribeQuestion', upload.single('file'), async (req, res) =
     res.json(questionText)
   } catch (err) {
     res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
+      msg: messages.serverOrDbError,
       error: err.message
     });
   }
@@ -270,7 +273,7 @@ app.post('/api/v1/gradeAnswer', async (req, res) => {
     res.json(gradedAnswer)
   } catch (err) {
     res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
+      msg: messages.serverOrDbError,
       error: err.message
     });
   }
@@ -284,7 +287,7 @@ app.post('/api/v1/apiEndpointUsage', async (req, res) => {
     res.json(result)
   } catch (err) {
     res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
+      msg: messages.serverOrDbError,
       error: err.message
     });
   }
@@ -298,7 +301,7 @@ app.post('/api/v1/apiUserUsage', async (req, res) => {
     res.json(result)
   } catch (err) {
     res.status(500).json({
-      msg: 'Error connecting to the database or executing query',
+      msg: messages.serverOrDbError,
       error: err.message
     });
   }

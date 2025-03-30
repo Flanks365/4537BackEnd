@@ -1,0 +1,6 @@
+{
+    "dbQuerySuccess": "Database connection and query successful",
+    "serverError": "Server error: ",
+    "serverOrDbError": "Error connecting to the database or executing query",
+    "noFile": "Audio file not found"
+}
