@@ -227,6 +227,7 @@ class SessionTeacherUtils {
 class SessionStudentUtils {
     static async joinSession(req) {
         try {
+            throw new Error('in join session')
             const {session_code, token} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
             await apiStatsUtils.incrementUsage(userId, '/api/v1/joinSession', 'POST');
