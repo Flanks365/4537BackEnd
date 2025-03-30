@@ -2,10 +2,12 @@ require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const Database = require('./database');
 const db = new Database();
 
+const secretKey = process.env.JWT_SECRET_KEY;
 const API_URL = process.env.AI_API_URL;
 const API_KEY = process.env.AI_API_KEY;
 
