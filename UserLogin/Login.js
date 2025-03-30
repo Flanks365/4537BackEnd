@@ -31,7 +31,7 @@ async function checkLogin(req, res) {
         await db.insertQuery(`DELETE FROM validTokens WHERE user_id = '${user.id}'`);
 
         // Generate JWT using HMAC (HS256)
-        const token = jwt.sign({ userId, email, role: user.role }, secretKey, { algorithm: 'HS256', expiresIn: '3h' });
+        const token = jwt.sign({ userId: user.id, email, role: user.role }, secretKey, { algorithm: 'HS256', expiresIn: '3h' });
 
         await db.insertQuery(`INSERT INTO validTokens (user_id, token) VALUES ('${user.id}', '${token}')`);
 
