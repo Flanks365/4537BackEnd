@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const Database = require('./database');
 const fs = require('fs');
+const apiStatsUtils = require('./apiStats')
 
 const messages = JSON.parse(fs.readFileSync('./lang/en/messages.json'));
 const secretKey = process.env.JWT_SECRET_KEY;
@@ -178,6 +179,9 @@ async function logOut(req, res) {
             msg: messages.errors.noTokenProvided
         });
     }
+
+    const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
+    await apiStatsUtils.incrementUsage(userId, '/api/v1/logout', 'DELETE');
 
     try {
         await db.deleteQuery(`DELETE FROM validTokens WHERE token = '${token}'`);

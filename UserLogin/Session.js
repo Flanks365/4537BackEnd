@@ -103,7 +103,7 @@ class SessionTeacherUtils {
         try {
             const {token} = req.body;
             const userId = jwt.verify(token, secretKey, { algorithms: ['HS256'] }).userId;
-            await apiStatsUtils.incrementUsage(userId, '/api/v1/destroySession', 'POST');
+            await apiStatsUtils.incrementUsage(userId, '/api/v1/destroySession', 'PUT');
 
             if (!req.body || !req.body.sessionId) {
                 return {
