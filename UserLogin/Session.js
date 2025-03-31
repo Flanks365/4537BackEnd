@@ -248,9 +248,15 @@ class SessionStudentUtils {
                 // };
             }
 
+            const alreadyJoinedQuery = `SELECT * FROM UserSession WHERE user_id = '${userId}' AND session_id = '${sessionResult[0].id}'`;
+            const alreadyJoinedResult = await db.selectQuery(alreadyJoinedQuery);
+            if (alreadyJoinedResult.length = 0) {
+
             const sessionId = sessionResult[0].id;
             const userSessionQuery = `INSERT INTO UserSession (user_id, session_id) VALUES ('${userId}', '${sessionId}')`;
             await db.insertQuery(userSessionQuery);
+            
+            }
 
             return {
                 success: true,
